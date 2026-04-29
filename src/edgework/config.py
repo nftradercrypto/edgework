@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     # SoDEX
     sodex_api_key: str = Field(default="", description="SoDEX API key")
     sodex_api_secret: str = Field(default="", description="SoDEX API secret")
-    sodex_base_url: str = Field(default="https://api.sodex.com")
+    sodex_base_url: str = Field(default="https://mainnet-gw.sodex.dev")
 
     # SoSoValue
     sosovalue_api_key: str = Field(default="", description="SoSoValue API key")

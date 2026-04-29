@@ -1,4 +1,4 @@
-"""SoDEX API client (read-only).
+﻿"""SoDEX API client (read-only).
 
 Wave 1 only needs read access:
 - account order history (your trades)
@@ -31,8 +31,7 @@ class SodexAuth:
     """Build the auth headers for a SoDEX request.
 
     Sign = HMAC-SHA256(secret, f"{nonce}{method}{path}{body}")  # hex
-    Adjust if/when the official docs say otherwise — this matches the
-    pattern used by the existing partial sodex_client.py.
+    Adjust if/when the official docs say otherwise.
     """
 
     api_key: str
@@ -114,11 +113,7 @@ class SodexClient:
         end_ms: int | None = None,
         limit: int = 500,
     ) -> list[dict[str, Any]]:
-        """Pull historical orders for the authenticated account.
-
-        Returns a list of order dicts as the API returns them — schema
-        normalization happens in `slicer.normalize_orders()`.
-        """
+        """Pull historical orders for the authenticated account."""
         params: dict[str, Any] = {"limit": limit}
         if symbol:
             params["symbol"] = symbol
@@ -127,7 +122,6 @@ class SodexClient:
         if end_ms:
             params["endTime"] = end_ms
         data = self._get("/api/v1/perps/trade/orders/history", params=params)
-        # API may return either a bare list or {"data": [...]}; handle both.
         if isinstance(data, dict) and "data" in data:
             return list(data["data"])
         return list(data)
@@ -139,11 +133,7 @@ class SodexClient:
         end_ms: int | None = None,
         limit: int = 500,
     ) -> list[dict[str, Any]]:
-        """Pull historical fills (executed trades) for the account.
-
-        Fills are usually more useful than orders for PNL slicing because
-        they reflect what actually executed at what price.
-        """
+        """Pull historical fills (executed trades) for the account."""
         params: dict[str, Any] = {"limit": limit}
         if symbol:
             params["symbol"] = symbol
@@ -162,11 +152,7 @@ class SodexClient:
         sort_by: str = "volume",
         limit: int = 100,
     ) -> list[dict[str, Any]]:
-        """Public leaderboard snapshot.
-
-        period: 'daily' | 'weekly' | 'season'
-        sort_by: 'volume' | 'pnl' | 'roi'
-        """
+        """Public leaderboard snapshot."""
         params = {"period": period, "sortBy": sort_by, "limit": limit}
         data = self._get("/api/v1/leaderboard", params=params)
         if isinstance(data, dict) and "data" in data:
@@ -177,21 +163,47 @@ class SodexClient:
         self,
         symbol: str,
         interval: str = "1h",
-        start_ms: int | None = None,
-        end_ms: int | None = None,
         limit: int = 500,
     ) -> list[dict[str, Any]]:
-        """Public OHLCV candles for regime context."""
-        params: dict[str, Any] = {
-            "symbol": symbol,
-            "interval": interval,
-            "limit": limit,
-        }
-        if start_ms:
-            params["startTime"] = start_ms
-        if end_ms:
-            params["endTime"] = end_ms
-        data = self._get("/api/v1/market/klines", params=params)
+        """Public OHLCV candles for a perps market (regime context).
+
+        Confirmed endpoint shape (per Buildathon API channel):
+            GET /api/v1/perps/markets/{symbol}/klines?interval=&limit=
+        """
+        path = f"/api/v1/perps/markets/{symbol}/klines"
+        params = {"interval": interval, "limit": limit}
+        data = self._get(path, params=params)
+        if isinstance(data, dict) and "data" in data:
+            return list(data["data"])
+        return list(data)
+
+    def get_perps_symbols(self) -> list[dict[str, Any]]:
+        """List all perps markets available on SoDEX."""
+        data = self._get("/api/v1/perps/markets/symbols")
+        if isinstance(data, dict) and "data" in data:
+            return list(data["data"])
+        return list(data)
+
+    def get_spot_klines(
+        self,
+        symbol: str,
+        interval: str = "1h",
+        limit: int = 500,
+    ) -> list[dict[str, Any]]:
+        """Public OHLCV candles for a spot market.
+
+        Spot uses virtual/wrapped naming (e.g. "vBTC_vUSDC", "wSOSO").
+        """
+        path = f"/api/v1/spot/markets/{symbol}/klines"
+        params = {"interval": interval, "limit": limit}
+        data = self._get(path, params=params)
+        if isinstance(data, dict) and "data" in data:
+            return list(data["data"])
+        return list(data)
+
+    def get_spot_symbols(self) -> list[dict[str, Any]]:
+        """List all spot markets (uses v-prefix / w-prefix naming)."""
+        data = self._get("/api/v1/spot/markets/symbols")
         if isinstance(data, dict) and "data" in data:
             return list(data["data"])
         return list(data)
