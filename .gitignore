@@ -1,0 +1,35 @@
+# Environments
+.env
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# Data (private)
+data/*.parquet
+data/*.csv
+data/*.json
+!data/.gitkeep
+
+# Streamlit
+.streamlit/secrets.toml
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Notebooks
+.ipynb_checkpoints/
