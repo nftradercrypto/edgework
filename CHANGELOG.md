@@ -6,6 +6,16 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+- SoDEX base URL updated to `https://mainnet-gw.sodex.dev` (confirmed
+  via Buildathon API channel).
+- `get_klines` now uses the perps-specific path
+  `/api/v1/perps/markets/{symbol}/klines`.
+
+### Added
+- `get_perps_symbols()` — list available perps markets dynamically.
+- `get_spot_klines()` and `get_spot_symbols()` — spot market support
+  (uses `v` / `w` prefixed virtual/wrapped naming).
 ## [0.1.0] — 2026-04-29 — Wave 1 kickoff
 
 ### Added
