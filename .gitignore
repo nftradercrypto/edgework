@@ -33,3 +33,6 @@ data/*.json
 
 # Notebooks
 .ipynb_checkpoints/
+
+# Local exploration scripts (private)
+explore.py

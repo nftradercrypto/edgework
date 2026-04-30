@@ -51,6 +51,64 @@ def test_normalize_handles_alternate_field_names():
     assert out.iloc[0]["pnl"] == 100.0
 
 
+def test_normalize_official_sodex_position_schema():
+    """Verify SoDEX's real Position shape from /positions/history.
+
+    Closed positions have size=0 (no open exposure left) and direction
+    is given by positionSide. Actual size traded is cumClosedSize.
+    """
+    raw = [
+        # A long that closed in profit
+        {
+            "id": 4463884,
+            "symbol": "BTC-USD",
+            "marginMode": "CROSS",
+            "positionSide": "LONG",
+            "size": 0,                          # closed → no open exposure
+            "initialMargin": 0,
+            "avgEntryPrice": 76230,
+            "cumOpenCost": 0,
+            "cumTradingFee": 0.11299596104,
+            "cumClosedSize": 0.00471,           # actual size traded
+            "avgClosePrice": 76285.67,
+            "maxSize": 0.00471,
+            "realizedPnL": 0.262,
+            "leverage": 10,
+            "active": False,
+            "createdAt": 1_750_000_000_000,
+            "updatedAt": 1_750_000_900_000,
+        },
+        # A short that closed in profit
+        {
+            "id": 4463885,
+            "symbol": "ETH-USD",
+            "marginMode": "CROSS",
+            "positionSide": "SHORT",
+            "size": 0,
+            "avgEntryPrice": 3000,
+            "avgClosePrice": 2950,
+            "cumClosedSize": 2.0,
+            "maxSize": 2.0,
+            "cumTradingFee": 5.5,
+            "realizedPnL": 100.0,
+            "leverage": 5,
+            "active": False,
+            "createdAt": 1_750_002_000_000,
+            "updatedAt": 1_750_003_000_000,
+        },
+    ]
+    out = slicer.normalize_orders(raw)
+    assert len(out) == 2
+    # Long
+    assert out.iloc[0]["side"] == "long"
+    assert out.iloc[0]["size"] == 0.00471        # from cumClosedSize, not size=0
+    assert out.iloc[0]["entry_price"] == 76230
+    # Short
+    assert out.iloc[1]["side"] == "short"
+    assert out.iloc[1]["size"] == 2.0
+    assert out.iloc[1]["pnl"] == 100.0
+
+
 def test_overall_returns_zero_for_empty():
     s = slicer.overall(pd.DataFrame(columns=slicer.REQUIRED_COLS))
     assert s.n_trades == 0

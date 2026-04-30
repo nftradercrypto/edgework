@@ -1,24 +1,41 @@
-﻿"""SoDEX API client (read-only).
+"""SoDEX REST API client.
 
-Wave 1 only needs read access:
-- account order history (your trades)
-- public leaderboard (for benchmarking)
-- public market data (for slicing context)
+Wave 1 scope: read-only endpoints, which on SoDEX are fully public —
+they take `userAddress` (your EVM public address) as part of the URL
+and require no auth headers at all. Confirmed by the official docs:
 
-Order placement / signing (EIP-712) is intentionally out of scope here.
-That belongs in Wave 2+ when execution is added.
+    curl -X GET "${PERPS_ENDPOINT}/accounts/{userAddress}/positions/history" \\
+      -H 'Accept: application/json'
 
-Authentication uses the documented header trio:
-    X-API-Key, X-API-Sign, X-API-Nonce
+This is by design: API keys on SoDEX exist only to *sign write actions*
+(EIP-712 typed signatures for new orders, cancels, leverage changes,
+transfers, etc). Querying account data needs neither the API key
+nor any signing.
+
+Write endpoints (out of scope for Wave 1, planned for Wave 2+) use
+EIP-712 signing per the Go SDK at sodex-tech/sodex-go-sdk-public.
+
+Endpoints implemented here:
+
+    Markets (no auth, no address)
+      GET /perps/markets/symbols
+      GET /perps/markets/{symbol}/klines
+      GET /perps/markets/tickers
+      GET /perps/markets/{symbol}/orderbook
+      GET /perps/markets/mark-prices
+
+    Account (no auth, address in URL)
+      GET /perps/accounts/{userAddress}/positions
+      GET /perps/accounts/{userAddress}/positions/history    ← Edgework's primary source
+      GET /perps/accounts/{userAddress}/orders/history
+      GET /perps/accounts/{userAddress}/trades
+      GET /perps/accounts/{userAddress}/balances
+      GET /perps/accounts/{userAddress}/fee-rate
+      GET /perps/accounts/{userAddress}/state
 """
 
 from __future__ import annotations
 
-import hashlib
-import hmac
-import json
-import time
-from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -26,48 +43,37 @@ import httpx
 from .config import get_settings
 
 
-@dataclass
-class SodexAuth:
-    """Build the auth headers for a SoDEX request.
+class SodexAPIError(RuntimeError):
+    """Raised when SoDEX returns code != 0 in an otherwise-200 response body."""
 
-    Sign = HMAC-SHA256(secret, f"{nonce}{method}{path}{body}")  # hex
-    Adjust if/when the official docs say otherwise.
-    """
-
-    api_key: str
-    api_secret: str
-
-    def headers(self, method: str, path: str, body: str = "") -> dict[str, str]:
-        nonce = str(int(time.time() * 1000))
-        message = f"{nonce}{method.upper()}{path}{body}"
-        sign = hmac.new(
-            self.api_secret.encode("utf-8"),
-            message.encode("utf-8"),
-            hashlib.sha256,
-        ).hexdigest()
-        return {
-            "X-API-Key": self.api_key,
-            "X-API-Sign": sign,
-            "X-API-Nonce": nonce,
-            "Content-Type": "application/json",
-        }
+    def __init__(self, code: int | None, message: str) -> None:
+        super().__init__(f"SoDEX error {code}: {message}")
+        self.code = code
+        self.message = message
 
 
 class SodexClient:
-    """Thin async-friendly wrapper for the SoDEX REST API."""
+    """Read-only SoDEX REST API client.
+
+    No private key required. Pass your wallet's public address
+    (the one you use to log into SoDEX) and you can query everything
+    Edgework needs.
+
+    Example:
+        with SodexClient(user_address="0xe5a7...f935") as client:
+            history = client.get_position_history(symbol="BTC-USD")
+    """
 
     def __init__(
         self,
-        api_key: str | None = None,
-        api_secret: str | None = None,
+        user_address: str | None = None,
         base_url: str | None = None,
         timeout: float = 20.0,
     ) -> None:
         s = get_settings()
-        self.api_key = api_key or s.sodex_api_key
-        self.api_secret = api_secret or s.sodex_api_secret
+        self.user_address = user_address or s.sodex_user_address
+        # base_url is .../api/v1; we append /perps or /spot per call
         self.base_url = (base_url or s.sodex_base_url).rstrip("/")
-        self._auth = SodexAuth(self.api_key, self.api_secret) if self.api_key else None
         self._client = httpx.Client(timeout=timeout)
 
     def close(self) -> None:
@@ -80,31 +86,135 @@ class SodexClient:
         self.close()
 
     # ------------------------------------------------------------------ #
-    # Low-level
+    # Internal HTTP
     # ------------------------------------------------------------------ #
 
     def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
+        """Issue a GET to {base_url}{path}. No auth headers."""
         url = f"{self.base_url}{path}"
-        headers = self._auth.headers("GET", path) if self._auth else {}
-        r = self._client.get(url, headers=headers, params=params)
+        r = self._client.get(url, params=params, headers={"Accept": "application/json"})
         r.raise_for_status()
         return r.json()
 
-    def _post(self, path: str, body: dict[str, Any]) -> Any:
-        url = f"{self.base_url}{path}"
-        body_str = json.dumps(body, separators=(",", ":"))
-        headers = self._auth.headers("POST", path, body_str) if self._auth else {}
-        r = self._client.post(url, headers=headers, content=body_str)
-        r.raise_for_status()
-        return r.json()
+    @staticmethod
+    def _unwrap(payload: Any) -> Any:
+        """SoDEX wraps successful responses as {code: 0, data: <...>, timestamp}.
+
+        On error: {code: <negative>, error: <str>, timestamp} — raise.
+        """
+        if isinstance(payload, dict) and "code" in payload:
+            if payload["code"] != 0:
+                raise SodexAPIError(payload.get("code"), payload.get("error", "unknown"))
+            return payload.get("data")
+        return payload
+
+    def _require_address(self) -> str:
+        if not self.user_address:
+            raise ValueError(
+                "user_address is required for account endpoints. "
+                "Set SODEX_USER_ADDRESS in .env or pass it to SodexClient(...)."
+            )
+        return self.user_address
 
     # ------------------------------------------------------------------ #
-    # High-level (read-only — Wave 1)
+    # Market endpoints (perps)
     # ------------------------------------------------------------------ #
 
-    def get_account(self) -> dict[str, Any]:
-        """Account summary (balances, tier, fee schedule)."""
-        return self._get("/api/v1/perps/account")
+    def get_perps_symbols(self, symbol: str | None = None) -> list[dict[str, Any]]:
+        """List perpetual symbols (e.g. BTC-USD, ETH-USD)."""
+        params = {"symbol": symbol} if symbol else None
+        data = self._unwrap(self._get("/perps/markets/symbols", params=params))
+        return list(data or [])
+
+    def get_perps_tickers(self, symbol: str | None = None) -> list[dict[str, Any]]:
+        """24h ticker stats for perps."""
+        params = {"symbol": symbol} if symbol else None
+        data = self._unwrap(self._get("/perps/markets/tickers", params=params))
+        return list(data or [])
+
+    def get_perps_mark_prices(self, symbol: str | None = None) -> list[dict[str, Any]]:
+        """Mark price + funding rate snapshot."""
+        params = {"symbol": symbol} if symbol else None
+        data = self._unwrap(self._get("/perps/markets/mark-prices", params=params))
+        return list(data or [])
+
+    def get_perps_klines(
+        self,
+        symbol: str,
+        interval: str = "1h",
+        start_ms: int | None = None,
+        end_ms: int | None = None,
+        limit: int = 500,
+    ) -> list[dict[str, Any]]:
+        """Candles for a perps symbol.
+
+        interval: 1m | 5m | 15m | 30m | 1h | 4h | 1D | 1W | 1M
+        """
+        params: dict[str, Any] = {"interval": interval, "limit": limit}
+        if start_ms:
+            params["startTime"] = start_ms
+        if end_ms:
+            params["endTime"] = end_ms
+        data = self._unwrap(self._get(f"/perps/markets/{symbol}/klines", params=params))
+        return list(data or [])
+
+    def get_perps_orderbook(self, symbol: str, limit: int = 50) -> dict[str, Any]:
+        """L2 order book snapshot."""
+        data = self._unwrap(
+            self._get(f"/perps/markets/{symbol}/orderbook", params={"limit": limit})
+        )
+        return data or {}
+
+    # ------------------------------------------------------------------ #
+    # Account endpoints (perps) — public, address in URL
+    # ------------------------------------------------------------------ #
+
+    def get_balances(self, account_id: int | None = None) -> dict[str, Any]:
+        """Current account balances (perps wallet)."""
+        addr = self._require_address()
+        params = {"accountID": account_id} if account_id else None
+        data = self._unwrap(
+            self._get(f"/perps/accounts/{addr}/balances", params=params)
+        )
+        return data or {}
+
+    def get_open_positions(self, account_id: int | None = None) -> dict[str, Any]:
+        """Currently open positions."""
+        addr = self._require_address()
+        params = {"accountID": account_id} if account_id else None
+        data = self._unwrap(
+            self._get(f"/perps/accounts/{addr}/positions", params=params)
+        )
+        return data or {}
+
+    def get_position_history(
+        self,
+        symbol: str | None = None,
+        start_ms: int | None = None,
+        end_ms: int | None = None,
+        limit: int = 500,
+        account_id: int | None = None,
+    ) -> list[dict[str, Any]]:
+        """Closed positions — Edgework's primary data source.
+
+        Each entry is a `Position` (see schema): includes avgEntryPrice,
+        avgClosePrice, realizedPnL (already net of fees + liquidation),
+        cumTradingFee, size (signed: + long, - short), createdAt, updatedAt.
+        """
+        addr = self._require_address()
+        params: dict[str, Any] = {"limit": limit}
+        if symbol:
+            params["symbol"] = symbol
+        if start_ms:
+            params["startTime"] = start_ms
+        if end_ms:
+            params["endTime"] = end_ms
+        if account_id:
+            params["accountID"] = account_id
+        data = self._unwrap(
+            self._get(f"/perps/accounts/{addr}/positions/history", params=params)
+        )
+        return list(data or [])
 
     def get_order_history(
         self,
@@ -112,8 +222,10 @@ class SodexClient:
         start_ms: int | None = None,
         end_ms: int | None = None,
         limit: int = 500,
+        account_id: int | None = None,
     ) -> list[dict[str, Any]]:
-        """Pull historical orders for the authenticated account."""
+        """Historical orders (filled, canceled, expired)."""
+        addr = self._require_address()
         params: dict[str, Any] = {"limit": limit}
         if symbol:
             params["symbol"] = symbol
@@ -121,19 +233,23 @@ class SodexClient:
             params["startTime"] = start_ms
         if end_ms:
             params["endTime"] = end_ms
-        data = self._get("/api/v1/perps/trade/orders/history", params=params)
-        if isinstance(data, dict) and "data" in data:
-            return list(data["data"])
-        return list(data)
+        if account_id:
+            params["accountID"] = account_id
+        data = self._unwrap(
+            self._get(f"/perps/accounts/{addr}/orders/history", params=params)
+        )
+        return list(data or [])
 
-    def get_fills(
+    def get_user_trades(
         self,
         symbol: str | None = None,
         start_ms: int | None = None,
         end_ms: int | None = None,
-        limit: int = 500,
+        limit: int = 1000,
+        account_id: int | None = None,
     ) -> list[dict[str, Any]]:
-        """Pull historical fills (executed trades) for the account."""
+        """Historical fill-level trade executions."""
+        addr = self._require_address()
         params: dict[str, Any] = {"limit": limit}
         if symbol:
             params["symbol"] = symbol
@@ -141,69 +257,35 @@ class SodexClient:
             params["startTime"] = start_ms
         if end_ms:
             params["endTime"] = end_ms
-        data = self._get("/api/v1/perps/trade/fills", params=params)
-        if isinstance(data, dict) and "data" in data:
-            return list(data["data"])
-        return list(data)
+        if account_id:
+            params["accountID"] = account_id
+        data = self._unwrap(
+            self._get(f"/perps/accounts/{addr}/trades", params=params)
+        )
+        return list(data or [])
 
-    def get_leaderboard(
+    def get_fee_rate(
         self,
-        period: str = "weekly",
-        sort_by: str = "volume",
-        limit: int = 100,
-    ) -> list[dict[str, Any]]:
-        """Public leaderboard snapshot."""
-        params = {"period": period, "sortBy": sort_by, "limit": limit}
-        data = self._get("/api/v1/leaderboard", params=params)
-        if isinstance(data, dict) and "data" in data:
-            return list(data["data"])
-        return list(data)
+        symbol: str | None = None,
+        account_id: int | None = None,
+    ) -> dict[str, Any]:
+        """Effective maker/taker fee rates and tier breakdown."""
+        addr = self._require_address()
+        params: dict[str, Any] = {}
+        if symbol:
+            params["symbol"] = symbol
+        if account_id:
+            params["accountID"] = account_id
+        data = self._unwrap(
+            self._get(f"/perps/accounts/{addr}/fee-rate", params=params)
+        )
+        return data or {}
 
-    def get_klines(
-        self,
-        symbol: str,
-        interval: str = "1h",
-        limit: int = 500,
-    ) -> list[dict[str, Any]]:
-        """Public OHLCV candles for a perps market (regime context).
-
-        Confirmed endpoint shape (per Buildathon API channel):
-            GET /api/v1/perps/markets/{symbol}/klines?interval=&limit=
-        """
-        path = f"/api/v1/perps/markets/{symbol}/klines"
-        params = {"interval": interval, "limit": limit}
-        data = self._get(path, params=params)
-        if isinstance(data, dict) and "data" in data:
-            return list(data["data"])
-        return list(data)
-
-    def get_perps_symbols(self) -> list[dict[str, Any]]:
-        """List all perps markets available on SoDEX."""
-        data = self._get("/api/v1/perps/markets/symbols")
-        if isinstance(data, dict) and "data" in data:
-            return list(data["data"])
-        return list(data)
-
-    def get_spot_klines(
-        self,
-        symbol: str,
-        interval: str = "1h",
-        limit: int = 500,
-    ) -> list[dict[str, Any]]:
-        """Public OHLCV candles for a spot market.
-
-        Spot uses virtual/wrapped naming (e.g. "vBTC_vUSDC", "wSOSO").
-        """
-        path = f"/api/v1/spot/markets/{symbol}/klines"
-        params = {"interval": interval, "limit": limit}
-        data = self._get(path, params=params)
-        if isinstance(data, dict) and "data" in data:
-            return list(data["data"])
-        return list(data)
-
-    def get_spot_symbols(self) -> list[dict[str, Any]]:
-        """List all spot markets (uses v-prefix / w-prefix naming)."""
-        data = self._get("/api/v1/spot/markets/symbols")
-        if isinstance(data, dict) and "data" in data:
-            return list(data["data"])
-        return list(data)
+    def get_account_state(self, account_id: int | None = None) -> dict[str, Any]:
+        """Comprehensive account snapshot (balances + positions + open orders)."""
+        addr = self._require_address()
+        params = {"accountID": account_id} if account_id else None
+        data = self._unwrap(
+            self._get(f"/perps/accounts/{addr}/state", params=params)
+        )
+        return data or {}

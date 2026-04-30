@@ -7,12 +7,17 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ## [Unreleased]
 
 ### Changed
-- SoDEX base URL updated to `https://mainnet-gw.sodex.dev` (confirmed via Buildathon API channel).
-- `get_klines` now uses the perps-specific path `/api/v1/perps/markets/{symbol}/klines`.
+- SoDEX client rewritten for the official read-only API model: read endpoints are public (no auth, no signing), require only `userAddress` in the URL path. Previous HMAC-based auth model removed entirely.
+- `slicer.normalize_orders` now reads `positionSide` ("LONG"/"SHORT") and `cumClosedSize` from the official SoDEX `Position` schema. Closed positions correctly identified as long/short and sized by traded volume rather than current open exposure.
+- Configuration: `SODEX_USER_ADDRESS` replaces `SODEX_API_KEY` + `SODEX_API_SECRET`. Base URL now includes `/api/v1` prefix.
 
 ### Added
-- `get_perps_symbols()` - list available perps markets dynamically.
-- `get_spot_klines()` and `get_spot_symbols()` - spot market support (uses `v` / `w` prefixed virtual/wrapped naming).
+- Validated against live SoDEX mainnet: 277 closed positions normalized end-to-end.
+- New unit test for the official SoDEX `Position` schema using realistic payload shapes.
+- New SoDEX client methods: `get_position_history`, `get_open_positions`, `get_user_trades`, `get_balances`, `get_fee_rate`, `get_account_state`, `get_perps_tickers`, `get_perps_mark_prices`, `get_perps_orderbook`.
+
+### Removed
+- HMAC auth path (`SodexAuth` class) - replaced by no-auth read model. EIP-712 signing for write actions is planned for Wave 2+.
 
 ## [0.1.0] - 2026-04-29 - Wave 1 kickoff
 

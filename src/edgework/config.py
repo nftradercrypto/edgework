@@ -22,10 +22,12 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    # SoDEX
-    sodex_api_key: str = Field(default="", description="SoDEX API key")
-    sodex_api_secret: str = Field(default="", description="SoDEX API secret")
-    sodex_base_url: str = Field(default="https://mainnet-gw.sodex.dev")
+    # SoDEX (read-only — endpoints are public, only need wallet address)
+    sodex_user_address: str = Field(
+        default="",
+        description="Your SoDEX wallet address (EVM, 0x...). Used in URL paths.",
+    )
+    sodex_base_url: str = Field(default="https://mainnet-gw.sodex.dev/api/v1")
 
     # SoSoValue
     sosovalue_api_key: str = Field(default="", description="SoSoValue API key")

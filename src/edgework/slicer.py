@@ -45,34 +45,51 @@ REQUIRED_COLS = [
 
 
 def normalize_orders(raw_orders: list[dict]) -> pd.DataFrame:
-    """Best-effort normalize raw SoDEX order/fill dicts into the slicer schema.
+    """Best-effort normalize raw SoDEX order/fill/position dicts into the slicer schema.
 
-    SoDEX's exact schema may vary; this function is intentionally tolerant.
-    Any field it can't infer is set to NaN — the slicer skips slices that
-    would be all-NaN.
+    Handles the official SoDEX `Position` schema (camelCase, `positionSide`
+    field, `realizedPnL`, `avgEntryPrice`, etc) plus a few alternate field
+    names from older shapes. Any field it can't infer is set to NaN.
+
+    Authoritative SoDEX `Position` fields (from /perps/accounts/{addr}/positions/history):
+        symbol, positionSide ("LONG"|"SHORT"), size (current open size — 0 if closed),
+        cumClosedSize (total size that actually traded over position lifetime),
+        maxSize (peak size), avgEntryPrice, avgClosePrice,
+        realizedPnL (incl. fees + liquidation loss), cumTradingFee,
+        createdAt (ms), updatedAt (ms), leverage, marginMode.
+
+    For closed positions in /positions/history, `size == 0` because there's
+    no open exposure left. We use `cumClosedSize` (preferred) or `maxSize`
+    as the meaningful size of the trade.
     """
     if not raw_orders:
         return pd.DataFrame(columns=REQUIRED_COLS)
 
     df = pd.DataFrame(raw_orders)
 
-    # Map common alternate names.
+    # Map alternate field names → our canonical schema.
     rename_map = {
+        # Timestamps
+        "createdAt": "opened_at",
         "openTime": "opened_at",
         "createTime": "opened_at",
+        "updatedAt": "closed_at",
         "closeTime": "closed_at",
         "updateTime": "closed_at",
+        # Prices
+        "avgEntryPrice": "entry_price",
         "avgPrice": "entry_price",
         "price": "entry_price",
+        "avgClosePrice": "exit_price",
         "closePrice": "exit_price",
-        "qty": "size",
-        "quantity": "size",
+        # PNL (already net of fees + liquidation per SoDEX schema)
+        "realizedPnL": "pnl",
         "realizedPnl": "pnl",
         "realizedProfit": "pnl",
     }
     df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
 
-    # Coerce timestamps (assume ms epoch if int).
+    # Coerce timestamps (assume ms epoch if numeric).
     for col in ("opened_at", "closed_at"):
         if col not in df.columns:
             df[col] = pd.NaT
@@ -82,22 +99,59 @@ def normalize_orders(raw_orders: list[dict]) -> pd.DataFrame:
         else:
             df[col] = pd.to_datetime(df[col], utc=True, errors="coerce")
 
-    # Side normalization.
-    if "side" in df.columns:
-        df["side"] = df["side"].astype(str).str.lower().str.replace("buy", "long").str.replace(
-            "sell", "short"
+    # Numeric coercion for prices, sizes, pnl.
+    for col in (
+        "entry_price",
+        "exit_price",
+        "pnl",
+        "leverage",
+        "size",
+        "cumClosedSize",
+        "maxSize",
+        "qty",
+        "quantity",
+    ):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
+    # ------------------------------------------------------------------ #
+    # Side resolution (priority: positionSide > signed size > 'side' field)
+    # ------------------------------------------------------------------ #
+    if "positionSide" in df.columns:
+        # SoDEX Position schema — explicit "LONG" / "SHORT"
+        df["side"] = df["positionSide"].astype(str).str.lower()
+    elif "size" in df.columns and df["size"].abs().sum() > 0:
+        # Some SoDEX shapes embed direction in signed `size`
+        df["side"] = np.where(df["size"] >= 0, "long", "short")
+    elif "side" in df.columns:
+        # Older shapes — could be 'buy'/'sell' or already 'long'/'short'
+        df["side"] = (
+            df["side"]
+            .astype(str)
+            .str.lower()
+            .str.replace("buy", "long")
+            .str.replace("sell", "short")
         )
     else:
         df["side"] = np.nan
 
-    # Numeric coercion.
-    for col in ("entry_price", "exit_price", "size", "pnl", "leverage"):
-        if col in df.columns:
-            df[col] = pd.to_numeric(df[col], errors="coerce")
-        elif col != "leverage":
-            df[col] = np.nan
+    # ------------------------------------------------------------------ #
+    # Size resolution (priority: cumClosedSize > maxSize > |size| > qty/quantity)
+    # ------------------------------------------------------------------ #
+    if "cumClosedSize" in df.columns and df["cumClosedSize"].abs().sum() > 0:
+        df["size"] = df["cumClosedSize"].abs()
+    elif "maxSize" in df.columns and df["maxSize"].abs().sum() > 0:
+        df["size"] = df["maxSize"].abs()
+    elif "size" in df.columns:
+        df["size"] = df["size"].abs()
+    elif "qty" in df.columns:
+        df["size"] = df["qty"].abs()
+    elif "quantity" in df.columns:
+        df["size"] = df["quantity"].abs()
+    else:
+        df["size"] = np.nan
 
-    # Drop trades with no PNL — they're open positions or failed entries.
+    # Drop trades with no PNL or no close — they're open positions or noise.
     df = df.dropna(subset=["pnl", "closed_at"]).reset_index(drop=True)
 
     # Ensure all required columns exist.
@@ -105,7 +159,9 @@ def normalize_orders(raw_orders: list[dict]) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = np.nan
 
-    return df[REQUIRED_COLS + (["leverage"] if "leverage" in df.columns else [])]
+    keep = REQUIRED_COLS + ([c for c in ("leverage",) if c in df.columns])
+    return df[keep]
+
 
 
 # --------------------------------------------------------------------------- #
