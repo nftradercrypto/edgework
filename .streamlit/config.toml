@@ -1,0 +1,16 @@
+# Edgework — TokenBar dark theme
+# Streamlit picks this up automatically; no flags needed.
+
+[theme]
+base = "dark"
+primaryColor = "#f5841f"
+backgroundColor = "#0a0a0a"
+secondaryBackgroundColor = "#141414"
+textColor = "#ffffff"
+font = "sans serif"
+
+[server]
+runOnSave = true
+
+[browser]
+gatherUsageStats = false
