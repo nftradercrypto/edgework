@@ -212,30 +212,49 @@ st.divider()
 # Sidebar — data input
 # --------------------------------------------------------------------------- #
 
+EXAMPLE_ADDRESS = "0x2d74A7CC2E31D85bf3988c3F62B593521362f83B"
+
+
+def _is_valid_evm_address(addr: str) -> bool:
+    """Check that the string looks like a 0x-prefixed 40-hex-char EVM address."""
+    if not addr or not isinstance(addr, str):
+        return False
+    addr = addr.strip()
+    if not addr.startswith("0x") or len(addr) != 42:
+        return False
+    try:
+        int(addr[2:], 16)
+        return True
+    except ValueError:
+        return False
+
+
 with st.sidebar:
     st.header("Trade history")
 
     parquet_path = Path("data/history.parquet")
     has_cached = parquet_path.exists()
 
-    options = []
+    options = ["From wallet address"]
     if has_cached:
-        options.append("Cached history (data/history.parquet)")
-    options += ["Upload file", "Paste JSON", "Use demo data"]
+        options.append("Cached file (data/history.parquet)")
+    options += ["Upload file", "Use demo data"]
 
     source = st.radio(
         "Data source",
         options,
         index=0,
         help=(
-            "Cached history is the parquet file produced by "
-            "`python scripts/pull_history.py`. Upload accepts parquet, CSV, or JSON."
+            "Paste any SoDEX wallet address to pull its closed positions live "
+            "from the public API. No login or signature required."
         ),
     )
 
     if has_cached:
         modtime = pd.Timestamp(parquet_path.stat().st_mtime, unit="s", tz="UTC")
-        st.caption(f"Cached file last updated: {modtime.strftime('%Y-%m-%d %H:%M UTC')}")
+        st.caption(
+            f"Cached file last updated: {modtime.strftime('%Y-%m-%d %H:%M UTC')}"
+        )
 
     st.markdown("---")
     st.caption(
@@ -251,7 +270,86 @@ with st.sidebar:
 raw_orders: list[dict] = []
 trades: pd.DataFrame | None = None
 
-if source.startswith("Cached history"):
+# Stable session-state cache so we don't re-fetch on every interaction.
+if "wallet_cache" not in st.session_state:
+    st.session_state.wallet_cache = {}  # {address: DataFrame}
+
+
+if source == "From wallet address":
+    st.markdown(
+        "<h3 style='margin-top: 0;'>Pull live SoDEX history</h3>",
+        unsafe_allow_html=True,
+    )
+    st.caption(
+        "Paste any wallet address that has traded perpetuals on SoDEX. "
+        "Edgework will fetch the closed positions directly from the public API."
+    )
+
+    col_input, col_btn = st.columns([4, 1])
+    with col_input:
+        address = st.text_input(
+            "Wallet address",
+            value=st.session_state.get("active_address", ""),
+            placeholder="0x...",
+            label_visibility="collapsed",
+        )
+    with col_btn:
+        fetch_clicked = st.button("Fetch", use_container_width=True)
+
+    st.caption(
+        f"Try the demo address: `{EXAMPLE_ADDRESS}` "
+        "(top-3 weekly volume trader, 277 closed positions in the last 30 days)."
+    )
+
+    if fetch_clicked:
+        addr_clean = address.strip()
+        if not _is_valid_evm_address(addr_clean):
+            st.error(
+                "That doesn't look like a valid EVM address. "
+                "Expected format: `0x` followed by 40 hex characters."
+            )
+        elif addr_clean in st.session_state.wallet_cache:
+            st.session_state.active_address = addr_clean
+            st.toast(f"Loaded cached history for {addr_clean[:10]}…")
+        else:
+            with st.spinner(f"Fetching positions for {addr_clean[:10]}…"):
+                try:
+                    from edgework.sodex_client import SodexClient
+
+                    end_ms = int(pd.Timestamp.utcnow().value // 1_000_000)
+                    start_ms = end_ms - 90 * 86_400_000
+
+                    with SodexClient(user_address=addr_clean) as c:
+                        positions = c.get_position_history(
+                            start_ms=start_ms,
+                            end_ms=end_ms,
+                            limit=500,
+                        )
+
+                    if not positions:
+                        st.warning(
+                            "No closed positions found for this address in "
+                            "the last 90 days. The wallet may not have traded "
+                            "on SoDEX, or the address is incorrect."
+                        )
+                    else:
+                        df = slicer.normalize_orders(positions)
+                        st.session_state.wallet_cache[addr_clean] = df
+                        st.session_state.active_address = addr_clean
+                        st.success(f"Loaded {len(df)} closed positions.")
+                except Exception as e:  # noqa: BLE001
+                    st.error(f"Could not fetch history: {e}")
+
+    # Pull whichever address is currently active
+    active = st.session_state.get("active_address")
+    if active and active in st.session_state.wallet_cache:
+        trades = st.session_state.wallet_cache[active]
+        st.caption(
+            f"Showing data for **`{active}`** "
+            f"(fetched {len(trades)} positions)."
+        )
+
+elif source.startswith("Cached file"):
     try:
         trades = pd.read_parquet(parquet_path)
     except Exception as e:  # noqa: BLE001
@@ -274,14 +372,6 @@ elif source == "Upload file":
                 raw_orders = raw.to_dict(orient="records")
         except Exception as e:  # noqa: BLE001
             st.sidebar.error(f"Could not parse file: {e}")
-
-elif source == "Paste JSON":
-    text = st.sidebar.text_area("JSON array of positions/orders", height=200)
-    if text.strip():
-        try:
-            raw_orders = json.loads(text)
-        except json.JSONDecodeError as e:
-            st.sidebar.error(f"Invalid JSON: {e}")
 
 else:  # Use demo data
     rng = np.random.default_rng(42)
@@ -312,12 +402,18 @@ else:  # Use demo data
 
 if trades is None:
     if not raw_orders:
-        st.info(
-            "Pick a data source in the sidebar to begin. "
-            "If you've run `python scripts/pull_history.py`, "
-            "the cached history option will appear automatically.",
-            icon="◇",
-        )
+        # Nothing loaded yet — show a hint and stop rendering the rest.
+        if source == "From wallet address":
+            st.info(
+                "Paste a wallet address above and click **Fetch** to begin. "
+                "Or click the example address to try with real data."
+            )
+        else:
+            st.info(
+                "Pick a data source in the sidebar to begin. "
+                "If you've run `python scripts/pull_history.py`, "
+                "the cached file option will appear automatically."
+            )
         st.stop()
     trades = slicer.normalize_orders(raw_orders)
 
