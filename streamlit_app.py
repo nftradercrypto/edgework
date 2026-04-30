@@ -212,9 +212,6 @@ st.divider()
 # Sidebar — data input
 # --------------------------------------------------------------------------- #
 
-EXAMPLE_ADDRESS = "0x2d74A7CC2E31D85bf3988c3F62B593521362f83B"
-
-
 def _is_valid_evm_address(addr: str) -> bool:
     """Check that the string looks like a 0x-prefixed 40-hex-char EVM address."""
     if not addr or not isinstance(addr, str):
@@ -297,8 +294,7 @@ if source == "From wallet address":
         fetch_clicked = st.button("Fetch", use_container_width=True)
 
     st.caption(
-        f"Try the demo address: `{EXAMPLE_ADDRESS}` "
-        "(top-3 weekly volume trader, 277 closed positions in the last 30 days)."
+        "Address must be a valid EVM wallet that has traded perpetuals on SoDEX."
     )
 
     if fetch_clicked:
