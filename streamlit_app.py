@@ -23,12 +23,19 @@ import streamlit as st
 
 
 # --------------------------------------------------------------------------- #
-# Streamlit Cloud secrets bridge
+# Secrets loading — runs BEFORE edgework.config is imported (lru_cached)
 # --------------------------------------------------------------------------- #
-# On Streamlit Cloud, secrets are configured via the dashboard and exposed
-# through `st.secrets`. Locally we read from `.env`. Bridge st.secrets into
-# os.environ so pydantic-settings picks them up either way.
-# Must run BEFORE get_settings() is imported/called (lru_cached).
+# Two sources, in priority order:
+#   1. Streamlit Cloud Secrets (st.secrets) — used in deployed environment
+#   2. Local .env file via python-dotenv — used in dev
+#
+# Both bridge into os.environ so pydantic-settings just reads env vars
+# regardless of where we're running. We override env vars only when the
+# existing value is empty/missing — some shells (Claude Code, CI) pre-set
+# keys like ANTHROPIC_API_KEY="" for isolation, which would otherwise
+# silently shadow the .env value if we used load_dotenv(override=False).
+
+# 1) Streamlit Cloud Secrets
 try:
     _secrets = dict(st.secrets)  # raises if no secrets.toml AND not on Cloud
     for _key in ("ANTHROPIC_API_KEY", "ANTHROPIC_MODEL",
@@ -36,7 +43,22 @@ try:
         if _key in _secrets and not os.environ.get(_key):
             os.environ[_key] = str(_secrets[_key])
 except (FileNotFoundError, KeyError, AttributeError):
-    pass  # local dev without secrets.toml — .env will be used
+    pass  # local dev without secrets.toml — fall through to .env
+
+# 2) Local .env (search cwd, app dir, then walk up two levels)
+try:
+    from dotenv import dotenv_values
+
+    _here = Path(__file__).resolve().parent
+    for _p in (Path.cwd() / ".env", _here / ".env",
+               _here.parent / ".env", _here.parent.parent / ".env"):
+        if _p.is_file():
+            for _k, _v in dotenv_values(_p).items():
+                if _v and not os.environ.get(_k):
+                    os.environ[_k] = _v
+            break
+except ImportError:
+    pass
 
 
 from edgework import briefing, slicer  # noqa: E402
