@@ -12,6 +12,7 @@ Deploy: Streamlit Community Cloud, free tier.
 from __future__ import annotations
 
 import json
+import os
 from io import BytesIO
 from pathlib import Path
 
@@ -20,9 +21,27 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from edgework import briefing, slicer
-from edgework.config import get_settings
-from edgework.sosovalue_client import SoSoValueClient
+
+# --------------------------------------------------------------------------- #
+# Streamlit Cloud secrets bridge
+# --------------------------------------------------------------------------- #
+# On Streamlit Cloud, secrets are configured via the dashboard and exposed
+# through `st.secrets`. Locally we read from `.env`. Bridge st.secrets into
+# os.environ so pydantic-settings picks them up either way.
+# Must run BEFORE get_settings() is imported/called (lru_cached).
+try:
+    _secrets = dict(st.secrets)  # raises if no secrets.toml AND not on Cloud
+    for _key in ("ANTHROPIC_API_KEY", "ANTHROPIC_MODEL",
+                 "SOSOVALUE_API_KEY", "SODEX_USER_ADDRESS"):
+        if _key in _secrets and not os.environ.get(_key):
+            os.environ[_key] = str(_secrets[_key])
+except (FileNotFoundError, KeyError, AttributeError):
+    pass  # local dev without secrets.toml — .env will be used
+
+
+from edgework import briefing, slicer  # noqa: E402
+from edgework.config import get_settings  # noqa: E402
+from edgework.sosovalue_client import SoSoValueClient  # noqa: E402
 
 
 # --------------------------------------------------------------------------- #
@@ -1151,13 +1170,24 @@ def _hour_dow_heatmap(df: pd.DataFrame, metric_key: str) -> None:
     if metric_key == "Winrate":
         zmid, zmin, zmax = 0.5, 0.0, 1.0
     else:
-        absmax = float(np.nanmax(np.abs(matrix.values))) if np.isfinite(matrix.values).any() else 1.0
+        # Use 85th percentile of |values| so outliers don't crush
+        # the rest of the cells toward the (dim) midpoint.
+        finite = matrix.values[np.isfinite(matrix.values)]
+        if finite.size:
+            absmax = float(np.nanpercentile(np.abs(finite), 85)) or 1.0
+        else:
+            absmax = 1.0
         zmid, zmin, zmax = 0, -absmax, absmax
 
+    # Diverging scale with vivid extremes and a visible mid-tone so
+    # near-zero cells still register as cells rather than disappearing
+    # into the background.
     colorscale = [
-        [0.0, "#5a1820"],
-        [0.5, BG],
-        [1.0, "#0f6b3f"],
+        [0.0,  RED],         # full red
+        [0.35, "#5a1820"],   # dark red
+        [0.5,  "#1c1c1c"],   # dark gray (not pure black)
+        [0.65, "#0f4a30"],   # dark green
+        [1.0,  GREEN],       # full green
     ]
 
     fig = go.Figure(
@@ -1417,8 +1447,15 @@ if st.button("Generate today's briefing", type="primary"):
     s = get_settings()
     if not s.anthropic_api_key:
         st.warning(
-            "Set `ANTHROPIC_API_KEY` in your `.env` to generate briefings. "
-            "The slicer above works without it."
+            "**Anthropic API key not configured.** Add it in one of:\n\n"
+            "- **Streamlit Cloud:** "
+            "*Manage app → Settings → Secrets* and paste:\n"
+            "  ```\n"
+            "  ANTHROPIC_API_KEY = \"sk-ant-...\"\n"
+            "  SOSOVALUE_API_KEY = \"...\"   # optional, for live market context\n"
+            "  ```\n"
+            "- **Local:** add the same keys to your `.env` file.\n\n"
+            "The conditional performance dashboard above works without these keys."
         )
     else:
         with st.spinner("Pulling market context and generating…"):
