@@ -26,7 +26,7 @@ from edgework.sosovalue_client import SoSoValueClient
 
 
 # --------------------------------------------------------------------------- #
-# Page config + brand palette
+# Page config
 # --------------------------------------------------------------------------- #
 
 st.set_page_config(
@@ -36,151 +36,397 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-BG = "#0a0a0a"
-PANEL = "#141414"
-ACCENT = "#f5841f"
-ACCENT_DIM = "rgba(245,132,31,0.06)"
-TEXT = "#ffffff"
-MUTED = "#888888"
-GREEN = "#22cc66"
-RED = "#cc4422"
-NEUTRAL = "#555555"
-GRID = "#1f1f1f"
+BG          = "#060606"
+SURFACE     = "#0d0d0d"
+PANEL       = "#111111"
+BORDER      = "#1c1c1c"
+ACCENT      = "#f5841f"
+ACCENT_DIM  = "rgba(245,132,31,0.07)"
+ACCENT_GLOW = "rgba(245,132,31,0.25)"
+TEXT        = "#e8e8e8"
+MUTED       = "#606060"
+GREEN       = "#00d97e"
+GREEN_DIM   = "rgba(0,217,126,0.07)"
+RED         = "#ff4560"
+RED_DIM     = "rgba(255,69,96,0.07)"
+GRID        = "#141414"
 
 
 st.markdown(
     f"""
     <style>
-    h1, h2, h3, h4 {{ color: {TEXT} !important; letter-spacing: -0.01em; }}
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-    [data-testid="stMetricLabel"] {{
-        color: {MUTED} !important;
+    /* ── App shell ── */
+    .stApp {{ background: {BG}; }}
+    #MainMenu, footer {{ visibility: hidden; }}
+    .stDeployButton {{ display: none !important; }}
+
+    /* ── Sidebar ── */
+    section[data-testid="stSidebar"] {{
+        background: {SURFACE} !important;
+        border-right: 1px solid {BORDER};
+    }}
+    [data-testid="stSidebar"] h2 {{
+        color: {ACCENT} !important;
+        font-family: 'Space Mono', monospace !important;
         font-size: 11px !important;
         text-transform: uppercase;
-        letter-spacing: 0.15em;
+        letter-spacing: 0.22em;
     }}
-    [data-testid="stMetricValue"] {{
-        color: {TEXT} !important;
-        font-weight: 800 !important;
+    [data-testid="stSidebar"] .stRadio label {{
+        font-size: 13px;
+        color: {TEXT};
     }}
 
+    /* ── Typography ── */
+    html, body, [class*="css"] {{
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }}
+    h1, h2, h3, h4 {{
+        color: {TEXT} !important;
+        font-family: 'Inter', sans-serif !important;
+        letter-spacing: -0.02em;
+    }}
+
+    /* ── Tabs ── */
     [data-baseweb="tab-list"] {{
-        gap: 8px;
-        border-bottom: 1px solid {GRID};
+        gap: 2px !important;
+        background: {SURFACE};
+        border-radius: 6px 6px 0 0;
+        padding: 4px 4px 0 4px;
+        border: 1px solid {BORDER};
+        border-bottom: none;
     }}
     [data-baseweb="tab"] {{
         color: {MUTED} !important;
         font-weight: 500;
+        font-size: 13px !important;
+        border-radius: 4px 4px 0 0 !important;
+        padding: 7px 16px !important;
+        transition: all 0.15s ease;
+        font-family: 'Inter', sans-serif !important;
+    }}
+    [data-baseweb="tab"]:hover {{
+        color: {TEXT} !important;
+        background: rgba(255,255,255,0.04) !important;
     }}
     [data-baseweb="tab"][aria-selected="true"] {{
         color: {ACCENT} !important;
-        font-weight: 700;
+        font-weight: 700 !important;
+        background: {ACCENT_DIM} !important;
+        border-bottom: 2px solid {ACCENT} !important;
     }}
+    [data-baseweb="tab-highlight"] {{ display: none; }}
+    [data-baseweb="tab-border"] {{ display: none; }}
 
-    [data-testid="stSidebar"] h2 {{
-        color: {ACCENT} !important;
-        font-size: 14px !important;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-    }}
-
+    /* ── Buttons ── */
     .stButton > button {{
         background: {ACCENT} !important;
         color: #000 !important;
         border: none !important;
         font-weight: 700 !important;
         letter-spacing: 0.04em;
+        font-size: 13px !important;
+        border-radius: 5px !important;
+        transition: all 0.15s ease !important;
+        padding: 8px 20px !important;
     }}
     .stButton > button:hover {{
-        background: #ffa340 !important;
+        background: #ff9a3c !important;
+        box-shadow: 0 4px 24px {ACCENT_GLOW} !important;
+        transform: translateY(-1px);
     }}
 
-    hr {{ border-color: {GRID} !important; }}
+    /* ── Dividers ── */
+    hr {{ border: none; border-top: 1px solid {BORDER} !important; margin: 28px 0 !important; }}
 
-    [data-testid="stDataFrame"] {{ border: 1px solid {GRID}; }}
-
-    .edgework-brand {{
-        font-family: 'Space Mono', ui-monospace, monospace;
-        font-size: 11px;
-        letter-spacing: 0.25em;
-        color: {ACCENT};
+    /* ── Expander ── */
+    [data-testid="stExpander"] {{
+        border: 1px solid {BORDER} !important;
+        border-radius: 6px !important;
+        background: {SURFACE} !important;
+    }}
+    [data-testid="stExpander"] summary {{
+        color: {MUTED} !important;
+        font-size: 11px !important;
+        font-family: 'Space Mono', monospace !important;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        margin-bottom: 4px;
-    }}
-    .edgework-headline {{
-        font-size: 38px;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        line-height: 1.05;
-        margin: 0 0 8px 0;
-        color: {TEXT};
-    }}
-    .edgework-headline .accent {{ color: {ACCENT}; }}
-    .edgework-sub {{
-        color: {MUTED};
-        max-width: 720px;
-        font-size: 15px;
-        line-height: 1.5;
     }}
 
-    /* Stat card grid */
-    .ew-card-grid {{
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-        margin: 12px 0 24px 0;
-    }}
-    .ew-card {{
-        background: {PANEL};
+    /* ── Dataframe ── */
+    [data-testid="stDataFrame"] {{
+        border: 1px solid {BORDER} !important;
         border-radius: 6px;
-        padding: 14px 16px;
-        border-left: 3px solid {NEUTRAL};
+        overflow: hidden;
     }}
-    .ew-card.win {{ border-left-color: {GREEN}; }}
-    .ew-card.loss {{ border-left-color: {RED}; }}
-    .ew-card-tag {{
-        font-family: 'Space Mono', ui-monospace, monospace;
+
+    /* ── Spinner ── */
+    [data-testid="stSpinner"] > div {{ border-top-color: {ACCENT} !important; }}
+
+    /* ── HEADER ── */
+    .ew-topbar {{
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        font-family: 'Space Mono', monospace;
         font-size: 10px;
-        letter-spacing: 0.2em;
-        color: {ACCENT};
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }}
-    .ew-card-label {{
-        font-family: 'Space Mono', ui-monospace, monospace;
-        font-size: 11px;
-        letter-spacing: 0.15em;
+        letter-spacing: 0.22em;
         color: {MUTED};
         text-transform: uppercase;
-        margin-bottom: 6px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid {BORDER};
+        margin-bottom: 32px;
     }}
-    .ew-card-value {{
-        font-size: 24px;
+    .ew-topbar-brand {{ color: {ACCENT}; font-weight: 700; font-size: 11px; }}
+    .ew-topbar-sep {{ color: {BORDER}; }}
+    .ew-live-badge {{
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: {GREEN};
         font-weight: 700;
-        line-height: 1;
-        margin-bottom: 4px;
-        color: {MUTED};
     }}
-    .ew-card-value.win {{ color: {GREEN}; }}
-    .ew-card-value.loss {{ color: {RED}; }}
-    .ew-card-meta {{
+    .ew-live-dot {{
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: {GREEN};
+        display: inline-block;
+        animation: ew-pulse 2.2s ease-in-out infinite;
+    }}
+    @keyframes ew-pulse {{
+        0%, 100% {{ opacity: 1; box-shadow: 0 0 0 0 rgba(0,217,126,0.5); }}
+        50% {{ opacity: 0.7; box-shadow: 0 0 0 5px rgba(0,217,126,0); }}
+    }}
+    .ew-headline {{
+        font-size: 46px;
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        line-height: 1.02;
+        margin: 0 0 14px 0;
+        color: {TEXT};
+        font-family: 'Inter', sans-serif;
+    }}
+    .ew-headline .accent {{
+        background: linear-gradient(110deg, {ACCENT} 0%, #ffb347 60%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }}
+    .ew-sub {{
+        color: {MUTED};
+        max-width: 680px;
+        font-size: 15px;
+        line-height: 1.65;
+        font-weight: 400;
+        margin-bottom: 4px;
+    }}
+
+    /* ── METRIC GRID ── */
+    .ew-metrics {{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1px;
+        background: {BORDER};
+        border: 1px solid {BORDER};
+        border-radius: 8px;
+        overflow: hidden;
+        margin: 24px 0 32px 0;
+    }}
+    .ew-metric {{
+        background: {SURFACE};
+        padding: 22px 24px 18px;
+        position: relative;
+    }}
+    .ew-metric-label {{
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.28em;
+        color: {MUTED};
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }}
+    .ew-metric-value {{
+        font-family: 'Space Mono', monospace;
+        font-size: 28px;
+        font-weight: 700;
+        color: {TEXT};
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }}
+    .ew-metric-value.pos {{ color: {GREEN}; }}
+    .ew-metric-value.neg {{ color: {RED}; }}
+    .ew-metric-sub {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: {MUTED};
+        margin-top: 7px;
+        letter-spacing: 0.05em;
+    }}
+    .ew-metric-glow {{
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, {ACCENT} 0%, transparent 70%);
+        opacity: 0.45;
+    }}
+
+    /* ── SECTION HEADER ── */
+    .ew-section {{
+        margin-bottom: 16px;
+    }}
+    .ew-section-title {{
+        font-size: 15px;
+        font-weight: 700;
+        color: {TEXT};
+        letter-spacing: -0.01em;
+        margin-bottom: 3px;
+    }}
+    .ew-section-sub {{
         font-size: 12px;
         color: {MUTED};
         line-height: 1.5;
     }}
-    .ew-card-meta .strong {{ color: {TEXT}; font-weight: 600; }}
-    .ew-card-meta .pos {{ color: {GREEN}; font-weight: 600; }}
-    .ew-card-meta .neg {{ color: {RED}; font-weight: 600; }}
 
-    .edgework-briefing {{
+    /* ── STAT CARDS ── */
+    .ew-card-grid {{
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+        gap: 10px;
+        margin: 4px 0 20px 0;
+    }}
+    .ew-card {{
+        background: {SURFACE};
+        border: 1px solid {BORDER};
+        border-radius: 8px;
+        padding: 16px 18px 14px;
+        position: relative;
+        overflow: hidden;
+    }}
+    .ew-card::before {{
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 3px; height: 100%;
+        background: {BORDER};
+        border-radius: 8px 0 0 8px;
+    }}
+    .ew-card.win {{ border-color: rgba(0,217,126,0.22); background: {GREEN_DIM}; }}
+    .ew-card.win::before {{ background: {GREEN}; }}
+    .ew-card.loss {{ border-color: rgba(255,69,96,0.22); background: {RED_DIM}; }}
+    .ew-card.loss::before {{ background: {RED}; }}
+    .ew-card-tag {{
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.25em;
+        color: {MUTED};
+        text-transform: uppercase;
+        margin-bottom: 5px;
+    }}
+    .ew-card.win .ew-card-tag {{ color: {GREEN}; }}
+    .ew-card.loss .ew-card-tag {{ color: {RED}; }}
+    .ew-card-label {{
+        font-size: 14px;
+        font-weight: 600;
+        color: {TEXT};
+        margin-bottom: 10px;
+        letter-spacing: -0.01em;
+    }}
+    .ew-card-value {{
+        font-family: 'Space Mono', monospace;
+        font-size: 21px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 10px;
+        color: {MUTED};
+        letter-spacing: -0.02em;
+    }}
+    .ew-card-value.win {{ color: {GREEN}; }}
+    .ew-card-value.loss {{ color: {RED}; }}
+    .ew-wr-track {{
+        height: 3px;
+        background: {BORDER};
+        border-radius: 2px;
+        margin-bottom: 9px;
+        overflow: hidden;
+    }}
+    .ew-wr-fill {{
+        height: 100%;
+        border-radius: 2px;
+        background: {MUTED};
+    }}
+    .ew-card.win .ew-wr-fill {{ background: {GREEN}; }}
+    .ew-card.loss .ew-wr-fill {{ background: {RED}; }}
+    .ew-card-meta {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: {MUTED};
+        line-height: 1.9;
+        letter-spacing: 0.02em;
+    }}
+    .ew-card-meta .hi {{ color: {TEXT}; }}
+    .ew-card-meta .pos {{ color: {GREEN}; }}
+    .ew-card-meta .neg {{ color: {RED}; }}
+
+    /* ── BRIEFING ── */
+    .ew-briefing-wrap {{
+        border: 1px solid rgba(245,132,31,0.28);
         border-left: 3px solid {ACCENT};
-        padding: 18px 22px;
+        padding: 22px 26px 22px 28px;
         background: {ACCENT_DIM};
-        font-size: 16px;
-        line-height: 1.65;
-        color: #eaeaea;
-        margin-top: 8px;
-        border-radius: 0 6px 6px 0;
+        font-size: 15px;
+        line-height: 1.75;
+        color: #ddd;
+        margin-top: 14px;
+        border-radius: 0 8px 8px 0;
+        font-weight: 400;
+        position: relative;
+    }}
+    .ew-briefing-eyebrow {{
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.28em;
+        color: {ACCENT};
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }}
+
+    /* ── EQUITY CURVE LABEL ── */
+    .ew-chart-label {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        color: {MUTED};
+        text-transform: uppercase;
+        margin-bottom: 6px;
+    }}
+
+    /* ── EMPTY STATE ── */
+    .ew-empty {{
+        border: 1px dashed {BORDER};
+        border-radius: 8px;
+        padding: 40px 32px;
+        text-align: center;
+        margin: 20px 0;
+    }}
+    .ew-empty-icon {{
+        font-size: 28px;
+        margin-bottom: 12px;
+        color: {MUTED};
+        font-family: 'Space Mono', monospace;
+    }}
+    .ew-empty-title {{
+        font-size: 15px;
+        font-weight: 600;
+        color: {TEXT};
+        margin-bottom: 6px;
+    }}
+    .ew-empty-sub {{
+        font-size: 13px;
+        color: {MUTED};
+        line-height: 1.6;
     }}
     </style>
     """,
@@ -193,13 +439,23 @@ st.markdown(
 # --------------------------------------------------------------------------- #
 
 st.markdown(
-    """
-    <div class="edgework-brand">▍ Edgework</div>
-    <h1 class="edgework-headline">Trade analytics for <span class="accent">pro traders</span>.</h1>
-    <p class="edgework-sub">
-      PNL doesn't show you where your edge is. Edgework slices your SoDEX
-      history across time, behavior, and market regime — so you know which
-      setups make you money and which ones quietly bleed it.
+    f"""
+    <div class="ew-topbar">
+        <span class="ew-topbar-brand">▍ EDGEWORK</span>
+        <span class="ew-topbar-sep">|</span>
+        <span class="ew-live-badge">
+            <span class="ew-live-dot"></span>LIVE
+        </span>
+        <span class="ew-topbar-sep">|</span>
+        <span>SoDEX Perps</span>
+        <span class="ew-topbar-sep">|</span>
+        <span>SoSoValue Buildathon · Wave 1</span>
+    </div>
+    <h1 class="ew-headline">Know your edge.<br><span class="accent">Cut the noise.</span></h1>
+    <p class="ew-sub">
+        PNL doesn't show where your edge is. Edgework slices your SoDEX history
+        across time, behavior, and market regime — so you see exactly which setups
+        make you money, and which ones quietly bleed it.
     </p>
     """,
     unsafe_allow_html=True,
@@ -250,7 +506,7 @@ with st.sidebar:
     if has_cached:
         modtime = pd.Timestamp(parquet_path.stat().st_mtime, unit="s", tz="UTC")
         st.caption(
-            f"Cached file last updated: {modtime.strftime('%Y-%m-%d %H:%M UTC')}"
+            f"Cached: {modtime.strftime('%Y-%m-%d %H:%M UTC')}"
         )
 
     st.markdown("---")
@@ -267,19 +523,22 @@ with st.sidebar:
 raw_orders: list[dict] = []
 trades: pd.DataFrame | None = None
 
-# Stable session-state cache so we don't re-fetch on every interaction.
 if "wallet_cache" not in st.session_state:
-    st.session_state.wallet_cache = {}  # {address: DataFrame}
+    st.session_state.wallet_cache = {}
 
 
 if source == "From wallet address":
     st.markdown(
-        "<h3 style='margin-top: 0;'>Pull live SoDEX history</h3>",
+        f"""
+        <div class="ew-section">
+            <div class="ew-section-title">Pull live SoDEX history</div>
+            <div class="ew-section-sub">
+                Paste any wallet address that has traded perpetuals on SoDEX.
+                Fetched directly from the public API — no auth required.
+            </div>
+        </div>
+        """,
         unsafe_allow_html=True,
-    )
-    st.caption(
-        "Paste any wallet address that has traded perpetuals on SoDEX. "
-        "Edgework will fetch the closed positions directly from the public API."
     )
 
     col_input, col_btn = st.columns([4, 1])
@@ -287,15 +546,11 @@ if source == "From wallet address":
         address = st.text_input(
             "Wallet address",
             value=st.session_state.get("active_address", ""),
-            placeholder="0x...",
+            placeholder="0x…",
             label_visibility="collapsed",
         )
     with col_btn:
         fetch_clicked = st.button("Fetch", use_container_width=True)
-
-    st.caption(
-        "Address must be a valid EVM wallet that has traded perpetuals on SoDEX."
-    )
 
     if fetch_clicked:
         addr_clean = address.strip()
@@ -336,13 +591,11 @@ if source == "From wallet address":
                 except Exception as e:  # noqa: BLE001
                     st.error(f"Could not fetch history: {e}")
 
-    # Pull whichever address is currently active
     active = st.session_state.get("active_address")
     if active and active in st.session_state.wallet_cache:
         trades = st.session_state.wallet_cache[active]
         st.caption(
-            f"Showing data for **`{active}`** "
-            f"(fetched {len(trades)} positions)."
+            f"Showing **`{active}`** · {len(trades):,} positions"
         )
 
 elif source.startswith("Cached file"):
@@ -398,17 +651,34 @@ else:  # Use demo data
 
 if trades is None:
     if not raw_orders:
-        # Nothing loaded yet — show a hint and stop rendering the rest.
         if source == "From wallet address":
-            st.info(
-                "Paste a wallet address above and click **Fetch** to begin. "
-                "Or click the example address to try with real data."
+            st.markdown(
+                f"""
+                <div class="ew-empty">
+                    <div class="ew-empty-icon">[ 0x ]</div>
+                    <div class="ew-empty-title">Paste a wallet address to begin</div>
+                    <div class="ew-empty-sub">
+                        Enter any SoDEX trader's wallet above and click <strong>Fetch</strong>.<br>
+                        No login or private key required — public API only.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
         else:
-            st.info(
-                "Pick a data source in the sidebar to begin. "
-                "If you've run `python scripts/pull_history.py`, "
-                "the cached file option will appear automatically."
+            st.markdown(
+                f"""
+                <div class="ew-empty">
+                    <div class="ew-empty-icon">[ — ]</div>
+                    <div class="ew-empty-title">Select a data source to begin</div>
+                    <div class="ew-empty-sub">
+                        Choose from the sidebar. If you've run
+                        <code>python scripts/pull_history.py</code>, the cached file
+                        option will appear automatically.
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
         st.stop()
     trades = slicer.normalize_orders(raw_orders)
@@ -422,34 +692,165 @@ if trades is None or trades.empty:
 
 
 # --------------------------------------------------------------------------- #
-# Top metrics row
+# Compute stats
 # --------------------------------------------------------------------------- #
 
 overall = slicer.overall(trades)
 slices = slicer.slice_all(trades)
 
-c1, c2, c3, c4 = st.columns(4)
-c1.metric("Trades", f"{overall.n_trades:,}")
-c2.metric("Winrate", f"{overall.winrate:.1%}")
-c3.metric("Expectancy", f"${overall.expectancy:,.2f}")
-c4.metric("Total PNL", f"${overall.total_pnl:,.0f}")
+
+# --------------------------------------------------------------------------- #
+# Top metric row — custom HTML
+# --------------------------------------------------------------------------- #
+
+exp_cls = "pos" if overall.expectancy >= 0 else "neg"
+pnl_cls = "pos" if overall.total_pnl >= 0 else "neg"
+exp_sign = "+" if overall.expectancy > 0 else ""
+pnl_sign = "+" if overall.total_pnl > 0 else ""
+n_wins = int(round(overall.winrate * overall.n_trades))
+
+st.markdown(
+    f"""
+    <div class="ew-metrics">
+        <div class="ew-metric">
+            <div class="ew-metric-label">Total Trades</div>
+            <div class="ew-metric-value">{overall.n_trades:,}</div>
+            <div class="ew-metric-sub">closed positions</div>
+            <div class="ew-metric-glow"></div>
+        </div>
+        <div class="ew-metric">
+            <div class="ew-metric-label">Win Rate</div>
+            <div class="ew-metric-value">{overall.winrate:.1%}</div>
+            <div class="ew-metric-sub">{n_wins:,} of {overall.n_trades:,} wins</div>
+            <div class="ew-metric-glow"></div>
+        </div>
+        <div class="ew-metric">
+            <div class="ew-metric-label">Expectancy / Trade</div>
+            <div class="ew-metric-value {exp_cls}">{exp_sign}${overall.expectancy:,.2f}</div>
+            <div class="ew-metric-sub">per trade avg</div>
+            <div class="ew-metric-glow"></div>
+        </div>
+        <div class="ew-metric">
+            <div class="ew-metric-label">Realized PNL</div>
+            <div class="ew-metric-value {pnl_cls}">{pnl_sign}${overall.total_pnl:,.0f}</div>
+            <div class="ew-metric-sub">all closed trades</div>
+            <div class="ew-metric-glow"></div>
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# --------------------------------------------------------------------------- #
+# Equity curve
+# --------------------------------------------------------------------------- #
+
+def _equity_curve(df: pd.DataFrame) -> None:
+    """Cumulative PNL line chart sorted by close time."""
+    close_col = next(
+        (c for c in ("close_time", "updatedAt", "closedAt") if c in df.columns),
+        None,
+    )
+    pnl_col = next(
+        (c for c in ("pnl", "realizedPnL", "realized_pnl") if c in df.columns),
+        None,
+    )
+    if close_col is None or pnl_col is None:
+        return
+
+    eq = df[[close_col, pnl_col]].copy().dropna()
+    eq = eq.sort_values(close_col)
+    eq["cum"] = eq[pnl_col].cumsum()
+
+    final = eq["cum"].iloc[-1]
+    line_color = GREEN if final >= 0 else RED
+    fill_color = GREEN_DIM if final >= 0 else RED_DIM
+
+    x_vals = eq[close_col].tolist()
+    y_vals = eq["cum"].tolist()
+
+    fig = go.Figure()
+
+    # Fill area
+    fig.add_trace(
+        go.Scatter(
+            x=x_vals,
+            y=y_vals,
+            fill="tozeroy",
+            fillcolor=fill_color,
+            line=dict(color="rgba(0,0,0,0)", width=0),
+            showlegend=False,
+            hoverinfo="skip",
+        )
+    )
+
+    # Main line
+    fig.add_trace(
+        go.Scatter(
+            x=x_vals,
+            y=y_vals,
+            mode="lines",
+            line=dict(color=line_color, width=2),
+            showlegend=False,
+            hovertemplate="<b>%{x|%b %d, %H:%M}</b><br>Cum. PNL: $%{y:,.0f}<extra></extra>",
+        )
+    )
+
+    # Final value annotation
+    fig.add_annotation(
+        x=x_vals[-1],
+        y=y_vals[-1],
+        text=f"  {'+'if final>=0 else ''}${final:,.0f}",
+        showarrow=False,
+        font=dict(color=line_color, family="Space Mono, monospace", size=12),
+        xanchor="left",
+    )
+
+    fig.update_layout(
+        plot_bgcolor=BG,
+        paper_bgcolor=BG,
+        font=dict(color=TEXT, family="Inter, sans-serif"),
+        xaxis=dict(
+            showgrid=False,
+            color=MUTED,
+            tickfont=dict(family="Space Mono, monospace", size=9),
+            linecolor=BORDER,
+            linewidth=1,
+        ),
+        yaxis=dict(
+            showgrid=True,
+            gridcolor=GRID,
+            gridwidth=1,
+            zerolinecolor=MUTED,
+            zerolinewidth=1,
+            color=MUTED,
+            tickfont=dict(family="Space Mono, monospace", size=9),
+            tickprefix="$",
+        ),
+        margin=dict(l=10, r=40, t=10, b=10),
+        height=200,
+        hovermode="x unified",
+        hoverlabel=dict(
+            bgcolor=PANEL,
+            bordercolor=BORDER,
+            font=dict(family="Space Mono, monospace", size=11),
+        ),
+    )
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+
+
+st.markdown('<div class="ew-chart-label">Equity curve — cumulative PNL</div>', unsafe_allow_html=True)
+_equity_curve(trades)
 
 st.divider()
 
 
 # --------------------------------------------------------------------------- #
-# Conditional Performance — stat cards + waterfall
+# Helpers — formatting
 # --------------------------------------------------------------------------- #
 
-st.subheader("Conditional performance")
-st.caption(
-    "Where you make money, and where you give it back. "
-    "Top cards highlight the extremes; chart shows total PNL contribution per slice."
-)
-
-
 def _money(x: float) -> str:
-    """Format currency with sign before symbol: -$5.20, +$12.40."""
     if x is None or pd.isna(x):
         return "—"
     sign = "−" if x < 0 else ("+" if x > 0 else "")
@@ -471,50 +872,45 @@ def _stat_card(
     winrate: float,
     total_pnl: float,
     *,
-    kind: str,  # "win" | "loss" | "neutral"
+    kind: str,
 ) -> str:
-    """Build the HTML for a single stat card (one-line, no indentation)."""
     kind_class = kind if kind in ("win", "loss") else ""
     value_class = kind if kind in ("win", "loss") else ""
     total_class = "pos" if total_pnl >= 0 else "neg"
+    wr_class = "pos" if winrate >= 0.5 else "neg"
+    wr_width = f"{winrate * 100:.1f}"
     return (
         f'<div class="ew-card {kind_class}">'
-        f'<div class="ew-card-tag">{tag}</div>'
-        f'<div class="ew-card-label">{label}</div>'
-        f'<div class="ew-card-value {value_class}">{_money(value)}</div>'
-        f'<div class="ew-card-meta">'
-        f'<span class="strong">{n_trades:,}</span> trades · {winrate:.0%} win'
-        f'<br>Total: <span class="{total_class}">{_money_int(total_pnl)}</span>'
-        f"</div>"
-        f"</div>"
+        f'  <div class="ew-card-tag">{tag}</div>'
+        f'  <div class="ew-card-label">{label}</div>'
+        f'  <div class="ew-card-value {value_class}">{_money(value)}</div>'
+        f'  <div class="ew-wr-track">'
+        f'    <div class="ew-wr-fill" style="width:{wr_width}%"></div>'
+        f'  </div>'
+        f'  <div class="ew-card-meta">'
+        f'    <span class="hi">{n_trades:,}</span> trades'
+        f'    &nbsp;·&nbsp;'
+        f'    <span class="{wr_class}">{winrate:.0%}</span> win'
+        f'    <br>'
+        f'    Total: <span class="{total_class}">{_money_int(total_pnl)}</span>'
+        f'  </div>'
+        f'</div>'
     )
 
 
 def _render_cards(slice_df: pd.DataFrame, key_col: str, key_label_fn=None) -> None:
-    """Render the most-losing and most-winning slices as cards.
-
-    - Filters out small samples (n < 5) to avoid noise.
-    - Deduplicates: a slice never appears as both Worst and Best.
-    - "Best" cards are only colored as wins if expectancy is genuinely positive.
-      If all slices are negative, the "best" cards stay neutral (grey).
-    """
     if slice_df.empty:
-        st.info("Not enough trades to extract extremes.")
         return
-
     df = slice_df.copy()
     if "n_trades" in df.columns:
         df = df[df["n_trades"] >= 5]
     if df.empty:
-        st.info("All slices have fewer than 5 trades — not enough signal.")
+        st.caption("All slices have fewer than 5 trades — not enough signal.")
         return
 
     df = df.sort_values("expectancy").reset_index(drop=True)
-
-    # How many to show on each side, scaling with sample size.
     n = len(df)
     if n <= 2:
-        # Tiny pool — show what we have without splitting
         worst_n, best_n = n, 0
     elif n <= 4:
         worst_n, best_n = 1, 1
@@ -524,7 +920,6 @@ def _render_cards(slice_df: pd.DataFrame, key_col: str, key_label_fn=None) -> No
     worst = df.iloc[:worst_n]
     best = df.iloc[-best_n:][::-1] if best_n > 0 else df.iloc[:0]
 
-    # Deduplicate: never show the same slice on both sides
     worst_keys = set(worst[key_col].astype(str).tolist())
     best = best[~best[key_col].astype(str).isin(worst_keys)]
 
@@ -532,11 +927,9 @@ def _render_cards(slice_df: pd.DataFrame, key_col: str, key_label_fn=None) -> No
 
     rows: list[tuple[str, str, dict]] = []
     for _, row in worst.iterrows():
-        # Always loss-colored if expectancy negative; else neutral
         kind = "loss" if row["expectancy"] < 0 else "neutral"
         rows.append(("Worst", kind, row.to_dict()))
     for _, row in best.iterrows():
-        # Only paint green if genuinely profitable; else neutral
         if row["expectancy"] > 0:
             tag, kind = "Best", "win"
         else:
@@ -544,24 +937,24 @@ def _render_cards(slice_df: pd.DataFrame, key_col: str, key_label_fn=None) -> No
         rows.append((tag, kind, row.to_dict()))
 
     if not rows:
-        st.info("Not enough distinct slices to render cards.")
         return
 
-    cols = st.columns(len(rows))
-    for col, (tag, kind, row) in zip(cols, rows):
-        with col:
-            col.markdown(
-                _stat_card(
-                    tag=tag,
-                    label=label_fn(row[key_col]),
-                    value=row["expectancy"],
-                    n_trades=int(row["n_trades"]),
-                    winrate=row["winrate"],
-                    total_pnl=row["total_pnl"],
-                    kind=kind,
-                ),
-                unsafe_allow_html=True,
-            )
+    html_cards = "".join(
+        _stat_card(
+            tag=tag,
+            label=label_fn(row[key_col]),
+            value=row["expectancy"],
+            n_trades=int(row["n_trades"]),
+            winrate=row["winrate"],
+            total_pnl=row["total_pnl"],
+            kind=kind,
+        )
+        for (tag, kind, row) in rows
+    )
+    st.markdown(
+        f'<div class="ew-card-grid">{html_cards}</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def _waterfall_chart(
@@ -572,13 +965,7 @@ def _waterfall_chart(
     sort_by_key: bool = False,
     key_label_fn=None,
 ) -> None:
-    """Render a PNL contribution chart: total_pnl per slice, color-coded by sign.
-
-    sort_by_key=True keeps natural ordering (e.g. hour 0,1,2...23).
-    sort_by_key=False sorts by total_pnl asc (worst first).
-    """
     if slice_df.empty:
-        st.info("Not enough trades to render the chart.")
         return
 
     df = slice_df.copy()
@@ -592,7 +979,6 @@ def _waterfall_chart(
     values = df["total_pnl"].tolist()
     colors = [GREEN if v >= 0 else RED for v in values]
     n_trades = df["n_trades"].astype(int).tolist()
-
     customdata = list(zip(n_trades, df["winrate"], df["expectancy"]))
 
     fig = go.Figure(
@@ -600,14 +986,14 @@ def _waterfall_chart(
             go.Bar(
                 x=labels,
                 y=values,
-                marker=dict(color=colors, line=dict(width=0)),
+                marker=dict(color=colors, opacity=0.88, line=dict(width=0)),
                 text=[f"n={n}" for n in n_trades],
                 textposition="outside",
-                textfont=dict(color=MUTED, size=10),
+                textfont=dict(color=MUTED, size=9, family="Space Mono, monospace"),
                 customdata=customdata,
                 hovertemplate=(
                     "<b>%{x}</b><br>"
-                    "Total PNL: %{y:$,.0f}<br>"
+                    "PNL: <b>%{y:$,.0f}</b><br>"
                     "Trades: %{customdata[0]}<br>"
                     "Winrate: %{customdata[1]:.1%}<br>"
                     "Expectancy: $%{customdata[2]:,.2f}"
@@ -617,34 +1003,48 @@ def _waterfall_chart(
         ]
     )
     fig.update_layout(
-        title=dict(text=title, font=dict(color=TEXT, size=14), x=0, xanchor="left"),
-        plot_bgcolor=BG,
+        title=dict(
+            text=title,
+            font=dict(color=MUTED, size=11, family="Space Mono, monospace"),
+            x=0,
+            xanchor="left",
+        ),
+        plot_bgcolor=SURFACE,
         paper_bgcolor=BG,
-        font=dict(color=TEXT, family="sans-serif"),
+        font=dict(color=TEXT, family="Inter, sans-serif"),
         xaxis=dict(
             showgrid=False,
             color=MUTED,
+            tickfont=dict(family="Space Mono, monospace", size=10),
             tickangle=0,
             type="category",
+            linecolor=BORDER,
+            linewidth=1,
         ),
         yaxis=dict(
             showgrid=True,
             gridcolor=GRID,
+            gridwidth=1,
             zerolinecolor=MUTED,
-            zerolinewidth=1,
+            zerolinewidth=1.5,
             color=MUTED,
-            title=dict(text="Total PNL ($)", font=dict(color=MUTED, size=11)),
+            tickfont=dict(family="Space Mono, monospace", size=10),
+            title=dict(text="Total PNL (USD)", font=dict(color=MUTED, size=10)),
             tickprefix="$",
         ),
-        margin=dict(l=20, r=20, t=44, b=20),
-        height=380,
-        bargap=0.25,
+        margin=dict(l=10, r=10, t=40, b=10),
+        height=360,
+        bargap=0.28,
+        hoverlabel=dict(
+            bgcolor=PANEL,
+            bordercolor=BORDER,
+            font=dict(family="Space Mono, monospace", size=11),
+        ),
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
 
 def _format_slice_table(df: pd.DataFrame) -> pd.DataFrame:
-    """Pretty-format slice DataFrames for display."""
     if df.empty:
         return df
     out = df.copy()
@@ -670,11 +1070,24 @@ def _format_slice_table(df: pd.DataFrame) -> pd.DataFrame:
 
 
 # --------------------------------------------------------------------------- #
-# Tabs
+# Conditional performance section
 # --------------------------------------------------------------------------- #
 
+st.markdown(
+    """
+    <div class="ew-section">
+        <div class="ew-section-title">Conditional performance</div>
+        <div class="ew-section-sub">
+            Where you make money — and where you give it back.
+            Cards show the extremes; charts show total PNL contribution per slice.
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 tab_hour, tab_streak, tab_size, tab_hold, tab_side, tab_symbol = st.tabs(
-    ["By hour", "By streak", "By size", "By hold", "By side", "By symbol"]
+    ["Hour of Day", "Loss Streak", "Size", "Hold Time", "Side", "Symbol"]
 )
 
 with tab_hour:
@@ -686,7 +1099,7 @@ with tab_hour:
     _waterfall_chart(
         slices["hour_of_day"],
         key_col="hour",
-        title="Total PNL by hour of day (UTC)",
+        title="TOTAL PNL BY HOUR OF DAY (UTC)",
         sort_by_key=True,
         key_label_fn=lambda h: f"{int(h):02d}h",
     )
@@ -699,14 +1112,14 @@ with tab_hour:
 
 with tab_streak:
     st.caption(
-        "Trades grouped by how many losses preceded them. If buckets after "
-        "multiple losses look much worse than 'fresh', that's a revenge-trading pattern."
+        "Trades grouped by prior consecutive losses. "
+        "If later buckets look much worse, that's a revenge-trading pattern."
     )
     _render_cards(slices["consecutive_losses"], key_col="streak_bucket")
     _waterfall_chart(
         slices["consecutive_losses"],
         key_col="streak_bucket",
-        title="Total PNL by losing-streak state",
+        title="TOTAL PNL BY LOSING-STREAK STATE",
     )
     with st.expander("Full table"):
         st.dataframe(
@@ -717,14 +1130,14 @@ with tab_streak:
 
 with tab_size:
     st.caption(
-        "Bucketed by your own size quartile (Q1 = smallest 25%, "
-        "Q4 = largest 25%). Reveals whether you actually make money on big bets."
+        "Bucketed by your own size quartile (Q1 = smallest 25%, Q4 = largest 25%). "
+        "Reveals whether you actually make money on big bets."
     )
     _render_cards(slices["size_quartile"], key_col="size_quartile")
     _waterfall_chart(
         slices["size_quartile"],
         key_col="size_quartile",
-        title="Total PNL by your own size quartile",
+        title="TOTAL PNL BY POSITION SIZE QUARTILE",
         sort_by_key=True,
     )
     with st.expander("Full table"):
@@ -739,7 +1152,7 @@ with tab_hold:
     _waterfall_chart(
         slices["hold_duration"],
         key_col="hold_bucket",
-        title="Total PNL by hold duration",
+        title="TOTAL PNL BY HOLD DURATION",
     )
     with st.expander("Full table"):
         st.dataframe(
@@ -753,7 +1166,7 @@ with tab_side:
     _waterfall_chart(
         slices["side"],
         key_col="side",
-        title="Total PNL by side",
+        title="TOTAL PNL BY SIDE",
         key_label_fn=lambda s: str(s).upper(),
     )
     with st.expander("Full table"):
@@ -768,7 +1181,7 @@ with tab_symbol:
     _waterfall_chart(
         slices["symbol"],
         key_col="symbol",
-        title="Total PNL by symbol",
+        title="TOTAL PNL BY SYMBOL",
     )
     with st.expander("Full table"):
         st.dataframe(
@@ -785,10 +1198,17 @@ st.divider()
 # AI Briefing
 # --------------------------------------------------------------------------- #
 
-st.subheader("Pre-session briefing")
-st.caption(
-    "Your edge + today's regime, condensed into one paragraph. "
-    "Powered by Anthropic Claude with live SoSoValue data."
+st.markdown(
+    """
+    <div class="ew-section">
+        <div class="ew-section-title">Pre-session briefing</div>
+        <div class="ew-section-sub">
+            Your historical edge + today's market regime, condensed into one paragraph.
+            Powered by Anthropic Claude with live SoSoValue data.
+        </div>
+    </div>
+    """,
+    unsafe_allow_html=True,
 )
 
 if st.button("Generate today's briefing", type="primary"):
@@ -796,7 +1216,7 @@ if st.button("Generate today's briefing", type="primary"):
     if not s.anthropic_api_key:
         st.warning(
             "Set `ANTHROPIC_API_KEY` in your `.env` to generate briefings. "
-            "The slicer above already works without it."
+            "The slicer above works without it."
         )
     else:
         with st.spinner("Pulling market context and generating…"):
@@ -819,7 +1239,12 @@ if st.button("Generate today's briefing", type="primary"):
                 edge = briefing.extract_trader_edge(overall, slices)
                 paragraph = briefing.generate_briefing(edge, market_ctx)
                 st.markdown(
-                    f"<div class='edgework-briefing'>{paragraph}</div>",
+                    f"""
+                    <div class="ew-briefing-wrap">
+                        <div class="ew-briefing-eyebrow">Pre-session briefing</div>
+                        {paragraph}
+                    </div>
+                    """,
                     unsafe_allow_html=True,
                 )
             except Exception as e:  # noqa: BLE001
