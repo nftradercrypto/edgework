@@ -1,10 +1,25 @@
-﻿streamlit>=1.36
-pandas>=2.2
+# Production deps for Streamlit Cloud deploy.
+# Pins are deliberately tight on the libs we touch heavily (pandas, streamlit,
+# anthropic) — the code assumes specific behavior that changed across recent
+# releases. The rest are lower-bounded for security/feature parity.
+
+# Streamlit ≥ 1.39 → st.segmented_control (used by the PT/EN toggle).
+streamlit>=1.39,<2.0
+
+# Pandas ≥ 3.0 → pd.date_range default dtype is datetime64[us]; the equity-
+# curve / regime-tagging code converts via .astype("datetime64[ms]") which
+# only works on the 3.x dtype. On pandas 2.x dates collapse to 1970.
+pandas>=3.0,<4.0
+
 numpy>=1.26
 plotly>=5.22
 httpx>=0.27
 python-dotenv>=1.0
-anthropic>=0.34
+
+# Anthropic SDK ≥ 0.40 → prompt-cache cache_control via list-typed `system`
+# blocks + the claude-sonnet-4-6 model id used in qna.py / briefing.py.
+anthropic>=0.40
+
 pydantic>=2.7
 pydantic-settings>=2.3
 pyarrow>=16.0

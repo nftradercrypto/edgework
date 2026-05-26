@@ -239,10 +239,17 @@ def generate_briefing(
 
     user_prompt = _build_user_prompt(edge, market)
 
+    # Prompt-cache the static system block — same SYSTEM_PROMPT every call,
+    # so subsequent briefings within a session pay ~10% of the input cost
+    # for the static portion.
     msg = client.messages.create(
         model=model,
         max_tokens=max_tokens,
-        system=SYSTEM_PROMPT,
+        system=[{
+            "type": "text",
+            "text": SYSTEM_PROMPT,
+            "cache_control": {"type": "ephemeral"},
+        }],
         messages=[{"role": "user", "content": user_prompt}],
     )
 

@@ -292,6 +292,18 @@ def by_hold_duration(trades: pd.DataFrame) -> pd.DataFrame:
     return _aggregate(df, "hold_bucket")
 
 
+def by_regime(trades: pd.DataFrame) -> pd.DataFrame:
+    """Slice by BTC market regime at the moment the position was opened.
+
+    Requires a ``regime`` column on ``trades`` — typically
+    ``uptrend`` / ``downtrend`` / ``chop`` — attached upstream from a daily
+    BTC kline series (see streamlit_app._attach_regime).
+    """
+    if "regime" not in trades.columns:
+        return pd.DataFrame()
+    return _aggregate(trades, "regime")
+
+
 # --------------------------------------------------------------------------- #
 # Internals
 # --------------------------------------------------------------------------- #
@@ -330,6 +342,7 @@ def slice_all(trades: pd.DataFrame) -> dict[str, pd.DataFrame]:
         "consecutive_losses": by_consecutive_losses(trades),
         "size_quartile": by_size_quartile(trades),
         "hold_duration": by_hold_duration(trades),
+        "regime": by_regime(trades),
     }
 
 
