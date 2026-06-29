@@ -54,6 +54,10 @@ def normalize_open_positions(raw: Any) -> list[dict]:
         except (TypeError, ValueError):
             upnl = 0.0
         size = abs(size_raw)
+        try:
+            opened_ms = int(p.get("createdAt") or 0) or None
+        except (TypeError, ValueError):
+            opened_ms = None
         out.append({
             "symbol": symbol,
             "side": side,
@@ -61,6 +65,7 @@ def normalize_open_positions(raw: Any) -> list[dict]:
             "entry_price": entry,
             "notional": size * entry if entry else 0.0,
             "unrealized_pnl": upnl,
+            "opened_at_ms": opened_ms,
         })
     return out
 

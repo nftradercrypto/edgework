@@ -42,7 +42,9 @@ from dotenv import load_dotenv  # noqa: E402
 from edgework.alerts import (  # noqa: E402
     AlertState,
     detect_divergences,
+    detect_risk_alerts,
     format_discord,
+    format_discord_risk,
     send_discord,
     send_test,
 )
@@ -56,7 +58,28 @@ def _log(msg: str) -> None:
     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] {msg}", flush=True)
 
 
-def _check_once(address: str, webhook: str, state: AlertState, *, dry_run: bool) -> int:
+def _fetch_history_df(address: str, days: int = 90):
+    """Normalized trades DataFrame for the watched wallet (for risk patterns)."""
+    try:
+        import pandas as pd
+
+        from edgework.sodex_client import SodexClient
+        from edgework.slicer import normalize_orders
+
+        end_ms = int(pd.Timestamp.now("UTC").value // 1_000_000)
+        start_ms = end_ms - days * 86_400_000
+        with SodexClient(user_address=address) as c:
+            hist = c.get_position_history_paginated(
+                start_ms=start_ms, end_ms=end_ms, page_limit=500, max_pages=40,
+            )
+        return normalize_orders(hist)
+    except Exception as e:  # noqa: BLE001
+        _log(f"history fetch failed (risk hooks disabled this cycle): {e}")
+        return None
+
+
+def _check_once(address: str, webhook: str, state: AlertState, *,
+                dry_run: bool, risk: bool) -> int:
     """One poll cycle. Returns the number of new alerts fired."""
     positions = fetch_open_positions(address)
     if not positions:
@@ -69,34 +92,47 @@ def _check_once(address: str, webhook: str, state: AlertState, *, dry_run: bool)
     if sm.get("error"):
         _log(f"smart-money fetch error: {sm['error']}")
         return 0
-
     consensus = sm.get("consensus_per_symbol", {}) or {}
-    alerts = detect_divergences(positions, consensus)
+
+    div_alerts = detect_divergences(positions, consensus)
+    risk_alerts = []
+    if risk:
+        trades_df = _fetch_history_df(address)
+        risk_alerts = detect_risk_alerts(positions, trades_df)
 
     # Keep state in step with reality: forget positions that are closed now.
-    live_keys = {f"{p['symbol']}:{p['side']}" for p in positions}
-    state.prune(live_keys)
+    live_div = {f"{p['symbol']}:{p['side']}" for p in positions}
+    live_risk = {a.key for a in risk_alerts}
+    state.prune(live_div | live_risk)
 
-    new_alerts = state.select_new(alerts)
+    new_div = state.select_new(div_alerts)
+    new_risk = state.select_new(risk_alerts)
     _log(
-        f"{len(positions)} positions · {len(alerts)} contrarian · "
-        f"{len(new_alerts)} new"
+        f"{len(positions)} positions · {len(div_alerts)} contrarian "
+        f"({len(new_div)} new) · {len(risk_alerts)} risk-pattern "
+        f"({len(new_risk)} new)"
     )
 
-    for a in new_alerts:
-        payload = format_discord(a, wallet=address, app_url=APP_URL)
+    def _emit(payload, label):
         if dry_run:
-            _log(f"  DRY-RUN would alert: {a.symbol} {a.user_side.upper()} "
-                 f"vs smart {a.smart_side.upper()} ({a.strength})")
-        else:
-            try:
-                code = send_discord(webhook, payload)
-                _log(f"  alerted {a.symbol} {a.user_side.upper()} → Discord {code}")
-            except Exception as e:  # noqa: BLE001 — keep the loop alive
-                _log(f"  send failed for {a.symbol}: {e}")
+            _log(f"  DRY-RUN would alert: {label}")
+            return
+        try:
+            code = send_discord(webhook, payload)
+            _log(f"  alerted {label} → Discord {code}")
+        except Exception as e:  # noqa: BLE001 — keep the loop alive
+            _log(f"  send failed for {label}: {e}")
+
+    for a in new_div:
+        _emit(format_discord(a, wallet=address, app_url=APP_URL),
+              f"{a.symbol} {a.user_side.upper()} vs smart "
+              f"{a.smart_side.upper()} ({a.strength})")
+    for a in new_risk:
+        _emit(format_discord_risk(a, wallet=address, app_url=APP_URL),
+              f"{a.symbol} {a.side.upper()} risk-pattern [{a.pattern_label}]")
 
     state.save()
-    return len(new_alerts)
+    return len(new_div) + len(new_risk)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -109,6 +145,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="seconds between checks in loop mode (default 300)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print alerts instead of sending them")
+    ap.add_argument("--no-risk", action="store_true",
+                    help="disable the 2D risk-pattern hook (divergence only)")
     ap.add_argument("--state", default=str(DEFAULT_STATE),
                     help=f"dedupe state file (default {DEFAULT_STATE})")
     args = ap.parse_args(argv)
@@ -129,17 +167,19 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit("SODEX_USER_ADDRESS not set in .env")
 
     state = AlertState.load(args.state)
+    risk = not args.no_risk
 
     if args.once:
-        _check_once(address, webhook, state, dry_run=args.dry_run)
+        _check_once(address, webhook, state, dry_run=args.dry_run, risk=risk)
         return 0
 
     _log(f"watching {address[:6]}…{address[-4:]} every {args.interval}s "
-         f"(state: {args.state}){' · DRY-RUN' if args.dry_run else ''}")
+         f"(state: {args.state}){' · DRY-RUN' if args.dry_run else ''}"
+         f"{' · no-risk' if args.no_risk else ''}")
     try:
         while True:
             try:
-                _check_once(address, webhook, state, dry_run=args.dry_run)
+                _check_once(address, webhook, state, dry_run=args.dry_run, risk=risk)
             except Exception as e:  # noqa: BLE001 — never let one cycle kill the loop
                 _log(f"cycle error: {e}")
             time.sleep(max(30, args.interval))

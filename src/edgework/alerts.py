@@ -42,6 +42,28 @@ class DivergenceAlert:
         return f"{self.symbol}:{self.user_side}"
 
 
+@dataclass
+class RiskAlert:
+    """A live position that matches one of the trader's own 2D anti-patterns."""
+
+    symbol: str
+    side: str
+    notional: float
+    pattern: tuple                # (("dim", val), ("dim", val))
+    expectancy: float             # historical expectancy of that pattern (negative)
+    n: int                        # sample size behind the pattern
+    win_rate: float
+
+    @property
+    def key(self) -> str:
+        dims = "+".join(f"{d}={v}" for d, v in self.pattern)
+        return f"risk:{self.symbol}:{self.side}:{dims}"
+
+    @property
+    def pattern_label(self) -> str:
+        return " + ".join(f"{str(d).upper()} {v}" for d, v in self.pattern)
+
+
 def _smart_bias(cs: dict) -> tuple[str | None, str]:
     """Return (bias_side, strength) for one symbol's consensus, or (None, '')."""
     lc, sc = int(cs.get("long_count", 0)), int(cs.get("short_count", 0))
@@ -96,6 +118,47 @@ def detect_divergences(
     return alerts
 
 
+def detect_risk_alerts(
+    open_positions: list[dict],
+    trades_df,
+    *,
+    regime: str | None = None,
+    min_n: int = 5,
+) -> list[RiskAlert]:
+    """Open positions that match one of the trader's own 2D anti-patterns.
+
+    Uses the risk engine: compute the trader's worst 2D combos from history,
+    then for each open position fire on the worst matching avoid-pattern
+    (one alert per position). Lazily imports ``risk`` so the divergence path
+    has no pandas/numpy dependency.
+    """
+    if trades_df is None or getattr(trades_df, "empty", True):
+        return []
+    from .risk import compute_risk_contexts, match_antipatterns, position_open_context
+
+    contexts = compute_risk_contexts(trades_df, min_n=min_n)
+    if not contexts:
+        return []
+
+    out: list[RiskAlert] = []
+    for pos in open_positions or []:
+        ctx = position_open_context(pos, trades_df, regime=regime)
+        matches = match_antipatterns(ctx, contexts, limit=1)
+        if not matches:
+            continue
+        m = matches[0]
+        out.append(RiskAlert(
+            symbol=pos["symbol"],
+            side=str(pos.get("side", "")).lower(),
+            notional=float(pos.get("notional", 0) or 0),
+            pattern=m["dims"],
+            expectancy=float(m["expectancy"]),
+            n=int(m["n"]),
+            win_rate=float(m["wr"]),
+        ))
+    return out
+
+
 # --------------------------------------------------------------------------- #
 # Discord formatting + send
 # --------------------------------------------------------------------------- #
@@ -139,6 +202,35 @@ def format_discord(alert: DivergenceAlert, *, wallet: str | None = None,
         "color": _COLOR_STRONG if alert.strength == "strong" else _COLOR_WEAK,
         "fields": fields,
         "footer": {"text": "Edgework · Smart Money Divergence"},
+    }
+    if wallet:
+        embed["footer"]["text"] += f" · {wallet[:6]}…{wallet[-4:]}"
+    if app_url:
+        url = app_url
+        if wallet:
+            sep = "&" if "?" in url else "?"
+            url = f"{url}{sep}w={wallet}"
+        embed["url"] = url
+    return {"embeds": [embed]}
+
+
+def format_discord_risk(alert: RiskAlert, *, wallet: str | None = None,
+                        app_url: str | None = None) -> dict:
+    """Discord payload for a risk-control hook: the position matches one of the
+    trader's historically losing 2D setups."""
+    exp = alert.expectancy
+    desc = (
+        f"You opened **{alert.side.upper()}** {_fmt_usd(alert.notional)} on "
+        f"**{alert.symbol}**, which matches one of your own losing setups.\n\n"
+        f"**Pattern:** {alert.pattern_label}\n"
+        f"**Your history here:** {alert.win_rate:.0%} win · "
+        f"${exp:,.2f}/trade expectancy across {alert.n} trades"
+    )
+    embed: dict[str, Any] = {
+        "title": f"🛑 Risk pattern — {alert.symbol}",
+        "description": desc,
+        "color": 0xB71C1C,
+        "footer": {"text": "Edgework · Risk-control hook"},
     }
     if wallet:
         embed["footer"]["text"] += f" · {wallet[:6]}…{wallet[-4:]}"
@@ -211,8 +303,11 @@ class AlertState:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.path.write_text(json.dumps(self.fired, indent=2), encoding="utf-8")
 
-    def select_new(self, alerts: list[DivergenceAlert]) -> list[DivergenceAlert]:
-        """Return alerts not already fired; mark them fired (in memory)."""
+    def select_new(self, alerts: list) -> list:
+        """Return alerts not already fired; mark them fired (in memory).
+
+        Works for any alert with a ``.key`` (DivergenceAlert, RiskAlert).
+        """
         now_ms = int(time.time() * 1000)
         fresh = [a for a in alerts if a.key not in self.fired]
         for a in fresh:

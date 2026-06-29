@@ -2284,8 +2284,8 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "al_run_label":  {"EN": "Then run the watcher on your machine:",
                       "PT": "Depois rode o monitor na sua máquina:"},
     "al_run_note":   {
-        "EN": "It polls your open positions every few minutes and posts a Discord alert on each new divergence — deduped so the same position never double-pings.",
-        "PT": "Ele verifica suas posições abertas a cada poucos minutos e posta um alerta no Discord a cada nova divergência — com dedupe pra mesma posição nunca avisar duas vezes.",
+        "EN": "It polls your open positions every few minutes and posts a Discord alert on each new <strong>smart-money divergence</strong> and each position that matches one of your own losing <strong>2D risk patterns</strong> — deduped so the same position never double-pings.",
+        "PT": "Ele verifica suas posições abertas a cada poucos minutos e posta um alerta no Discord a cada nova <strong>divergência do smart money</strong> e a cada posição que bate num dos seus <strong>padrões de risco 2D</strong> perdedores — com dedupe pra mesma posição nunca avisar duas vezes.",
     },
 
     # Tilt watch banner

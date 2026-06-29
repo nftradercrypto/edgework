@@ -19,12 +19,18 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   (dry-run by default; `--live` requires a typed `YES`). Keys never leave the
   user's machine; the hosted app is simulation-only.
 
-### Added — Smart Money Divergence alerts (Discord)
+### Added — Smart Money Divergence alerts + risk-control hooks (Discord)
 - `smart_money.py`: pure, importable consensus + open-positions fetch shared by
   the app and the poller.
 - `alerts.py`: divergence detection, Discord embed formatting, webhook send, and
   a dedupe state so the same open position never double-pings.
-- `scripts/alert_bot.py`: local read-only poller (`--test` / `--once` / loop).
+- `risk.py`: self-contained 2D anti-pattern engine + a matcher that flags an
+  open position against the trader's own losing setups. Powers the
+  **risk-control hook** — the poller also alerts when you open a position that
+  matches a historically losing 2D pattern (e.g. `SYMBOL LIT-USD + SIZE Q4`),
+  degrading gracefully on dimensions it can't evaluate at open time.
+- `scripts/alert_bot.py`: local read-only poller (`--test` / `--once` / loop /
+  `--no-risk`). Fires both divergence and risk-pattern alerts.
 - In-app webhook wizard: test the webhook + copy the command to run the watcher.
 
 ### Added — Contrarian track record (the evidence behind the alert)
