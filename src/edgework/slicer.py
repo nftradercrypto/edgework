@@ -86,6 +86,10 @@ def normalize_orders(raw_orders: list[dict]) -> pd.DataFrame:
         "realizedPnL": "pnl",
         "realizedPnl": "pnl",
         "realizedProfit": "pnl",
+        # Trading fees paid over the position's lifetime. Kept so the UI can
+        # decompose gross PNL (= pnl + fees) vs what fees ate.
+        "cumTradingFee": "fees",
+        "tradingFee": "fees",
     }
     df = df.rename(columns={k: v for k, v in rename_map.items() if k in df.columns})
 
@@ -104,6 +108,7 @@ def normalize_orders(raw_orders: list[dict]) -> pd.DataFrame:
         "entry_price",
         "exit_price",
         "pnl",
+        "fees",
         "leverage",
         "size",
         "cumClosedSize",
@@ -159,7 +164,7 @@ def normalize_orders(raw_orders: list[dict]) -> pd.DataFrame:
         if col not in df.columns:
             df[col] = np.nan
 
-    keep = REQUIRED_COLS + ([c for c in ("leverage",) if c in df.columns])
+    keep = REQUIRED_COLS + [c for c in ("leverage", "fees") if c in df.columns]
     return df[keep]
 
 

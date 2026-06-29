@@ -24,5 +24,13 @@ pydantic>=2.7
 pydantic-settings>=2.3
 pyarrow>=16.0
 
+# Wave 3 execution layer — EIP-712 order signing for SoDEX. eth-keys does the
+# ECDSA + wire format; eth-utils provides keccak256 (which needs an eth-hash
+# backend — pycryptodome). Deliberately NOT web3 (which drags in native
+# ckzg/cytoolz and bloats the deploy).
+eth-keys>=0.5,<1.0
+eth-utils>=2.0
+eth-hash[pycryptodome]>=0.5
+
 # Install the local edgework package itself
 -e .

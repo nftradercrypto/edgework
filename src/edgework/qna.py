@@ -164,12 +164,37 @@ TOOLS: list[dict[str, Any]] = [
 # --------------------------------------------------------------------------- #
 
 
+def _norm_label(s: object) -> str:
+    """Normalize a bucket label for comparison.
+
+    The hold-duration labels use en-dash ("5–30m"); the model frequently
+    sends a plain hyphen ("5-30m"). Without normalization the filter
+    silently matches nothing and the diagnostic reasons over missing data.
+    Folds en/em/minus dashes to "-", strips whitespace, lowercases.
+    """
+    return (
+        str(s)
+        .strip()
+        .lower()
+        .replace("–", "-")   # en-dash
+        .replace("—", "-")   # em-dash
+        .replace("−", "-")   # minus sign
+    )
+
+
+def _label_eq(series: pd.Series, value: object) -> pd.Series:
+    """Element-wise normalized label equality."""
+    target = _norm_label(value)
+    return series.astype(str).map(_norm_label) == target
+
+
 def _apply_filters(df: pd.DataFrame, filters: dict | None) -> pd.DataFrame:
     """Apply tool-style filters to a trades DataFrame.
 
     Uses the bucket columns attached by streamlit_app._add_bucket_columns +
     _attach_regime when available. Filters that reference columns the df
-    doesn't have are silently ignored.
+    doesn't have are silently ignored. Categorical labels are compared
+    dash/case/space-insensitively (see _norm_label).
     """
     if not filters:
         return df
@@ -179,17 +204,17 @@ def _apply_filters(df: pd.DataFrame, filters: dict | None) -> pd.DataFrame:
     if "day_of_week" in filters and "opened_at" in out.columns:
         out = out[out["opened_at"].dt.dayofweek == int(filters["day_of_week"])]
     if "side" in filters and "side" in out.columns:
-        out = out[out["side"].astype(str).str.lower() == str(filters["side"]).lower()]
+        out = out[_label_eq(out["side"], filters["side"])]
     if "symbol" in filters and "symbol" in out.columns:
-        out = out[out["symbol"].astype(str) == str(filters["symbol"])]
+        out = out[out["symbol"].astype(str).str.upper() == str(filters["symbol"]).upper()]
     if "streak_bucket" in filters and "_streak_b" in out.columns:
-        out = out[out["_streak_b"].astype(str) == str(filters["streak_bucket"])]
+        out = out[_label_eq(out["_streak_b"], filters["streak_bucket"])]
     if "size_quartile" in filters and "_size_q" in out.columns:
-        out = out[out["_size_q"].astype(str) == str(filters["size_quartile"])]
+        out = out[_label_eq(out["_size_q"], filters["size_quartile"])]
     if "hold_bucket" in filters and "_hold_b" in out.columns:
-        out = out[out["_hold_b"].astype(str) == str(filters["hold_bucket"])]
+        out = out[_label_eq(out["_hold_b"], filters["hold_bucket"])]
     if "regime" in filters and "regime" in out.columns:
-        out = out[out["regime"].astype(str) == str(filters["regime"])]
+        out = out[_label_eq(out["regime"], filters["regime"])]
     return out
 
 

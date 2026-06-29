@@ -36,3 +36,6 @@ data/*.json
 
 # Local exploration scripts (private)
 explore.py
+
+# Claude Code worktrees / scratch
+.claude/

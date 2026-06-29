@@ -459,6 +459,296 @@ st.markdown(
         opacity: 0.5;
     }}
 
+    /* ── Secondary metric row (risk + fees decomposition) ── */
+    .ew-metrics2 {{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        border: 1px solid {BORDER};
+        border-top: none;
+        background: {SURFACE};
+    }}
+    .ew-metric2 {{
+        padding: 12px 22px 13px;
+        border-right: 1px solid {BORDER};
+        position: relative;
+    }}
+    .ew-metric2:last-child {{ border-right: none; }}
+    .ew-metric2 .k {{
+        font-family: 'Space Mono', monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.2em;
+        color: {DIM};
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 5px;
+    }}
+    .ew-metric2 .v {{
+        font-family: 'Outfit', sans-serif;
+        font-size: 19px;
+        font-weight: 700;
+        color: {TEXT};
+    }}
+    .ew-metric2 .v.pos {{ color: {GREEN}; }}
+    .ew-metric2 .v.neg {{ color: {RED}; }}
+    .ew-metric2 .s {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: {DIM};
+        margin-left: 7px;
+    }}
+    .ew-fee-flip {{
+        border: 1px solid {RED};
+        background: rgba(255,59,48,0.05);
+        padding: 10px 16px;
+        margin-top: 10px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13.5px;
+        color: {TEXT};
+    }}
+    .ew-fee-flip strong {{ color: {RED}; }}
+
+    /* ── Tilt watch banner ── */
+    .ew-tilt {{
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+        border: 1px solid {ACCENT};
+        background: rgba(245,132,31,0.05);
+        padding: 12px 18px;
+        margin-top: 10px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13.5px;
+        color: {TEXT};
+    }}
+    .ew-tilt .tag {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        color: {ACCENT};
+        font-weight: 700;
+        white-space: nowrap;
+    }}
+    .ew-tilt .neg {{ color: {RED}; font-weight: 700; }}
+    .ew-tilt .hi  {{ color: {TEXT}; font-weight: 600; }}
+
+    /* ── Contrarian track record (Wave 3 · Etapa D) ── */
+    .ew-track {{
+        border: 1px solid {BORDER};
+        background: {SURFACE};
+        margin-top: 14px;
+    }}
+    .ew-track-grid {{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }}
+    .ew-track-cell {{
+        padding: 16px 20px 14px;
+        border-right: 1px solid {BORDER};
+    }}
+    .ew-track-cell:last-child {{ border-right: none; }}
+    .ew-track-cell .k {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 700;
+    }}
+    .ew-track-cell.contrarian .k {{ color: {RED}; }}
+    .ew-track-cell.aligned    .k {{ color: {GREEN}; }}
+    .ew-track-cell.nosignal   .k {{ color: {DIM}; }}
+    .ew-track-cell .big {{
+        font-family: 'Outfit', sans-serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: {TEXT};
+    }}
+    .ew-track-cell .sub {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10.5px;
+        color: {DIM};
+        margin-top: 6px;
+        line-height: 1.7;
+    }}
+    .ew-track-cell .sub .pos {{ color: {GREEN}; font-weight: 700; }}
+    .ew-track-cell .sub .neg {{ color: {RED};   font-weight: 700; }}
+    .ew-track-verdict {{
+        border-top: 1px solid {BORDER};
+        padding: 13px 20px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 14px;
+        color: {TEXT};
+    }}
+    .ew-track-verdict .pos {{ color: {GREEN}; font-weight: 700; }}
+    .ew-track-verdict .neg {{ color: {RED};   font-weight: 700; }}
+    .ew-track-caveat {{
+        border-top: 1px solid {BORDER};
+        padding: 9px 20px;
+        font-family: 'Space Mono', monospace;
+        font-size: 9.5px;
+        color: {DIM};
+        line-height: 1.7;
+    }}
+
+    /* ── Wave 3 execution layer (simulation panel) ── */
+    .ew-sim-eyebrow {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        color: {ACCENT};
+        text-transform: uppercase;
+        margin: 20px 0 8px;
+        font-weight: 700;
+    }}
+    .ew-sim {{
+        border: 1px solid {ACCENT};
+        background: rgba(245,132,31,0.04);
+        padding: 16px 18px 14px;
+        margin-top: 6px;
+    }}
+    .ew-sim-head {{
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 13px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }}
+    .ew-sim-head .tag {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        color: {ACCENT};
+        font-weight: 700;
+    }}
+    .ew-sim-head .meta {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: {MUTED};
+    }}
+    .ew-sim-grid {{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 11px 18px;
+    }}
+    .ew-sim-grid .wide {{ grid-column: 1 / -1; }}
+    .ew-sim-grid .k {{
+        display: block;
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.18em;
+        color: {DIM};
+        text-transform: uppercase;
+        margin-bottom: 3px;
+    }}
+    .ew-sim-grid .v {{
+        font-family: 'Outfit', sans-serif;
+        font-size: 13.5px;
+        color: {TEXT};
+        font-weight: 600;
+    }}
+    .ew-sim-grid .v.mono {{
+        font-family: 'Space Mono', monospace;
+        font-size: 11px;
+        color: {ACCENT};
+        word-break: break-all;
+        font-weight: 400;
+    }}
+    .ew-sim-note {{
+        margin-top: 13px;
+        padding-top: 11px;
+        border-top: 1px solid {BORDER};
+        font-family: 'Outfit', sans-serif;
+        font-size: 12.5px;
+        color: {MUTED};
+        line-height: 1.55;
+    }}
+    .ew-sim-note strong {{ color: {TEXT}; }}
+
+    /* ── TL;DR card (10-second summary) ── */
+    .ew-tldr {{
+        display: grid;
+        grid-template-columns: auto 1fr 1fr 1fr;
+        gap: 0;
+        border: 1px solid {ACCENT};
+        background: linear-gradient(180deg, rgba(245,132,31,0.07), rgba(245,132,31,0.02));
+        margin-bottom: 10px;
+    }}
+    .ew-tldr .cell {{
+        padding: 13px 18px;
+        border-right: 1px solid {BORDER_HI};
+    }}
+    .ew-tldr .cell:last-child {{ border-right: none; }}
+    .ew-tldr .k {{
+        font-family: 'Space Mono', monospace;
+        font-size: 9.5px;
+        letter-spacing: 0.2em;
+        color: {ACCENT};
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 700;
+    }}
+    .ew-tldr .v {{
+        font-family: 'Outfit', sans-serif;
+        font-size: 14.5px;
+        font-weight: 600;
+        color: {TEXT};
+    }}
+    .ew-tldr .v .pos {{ color: {GREEN}; }}
+    .ew-tldr .v .neg {{ color: {RED}; }}
+    .ew-tldr .v small {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: {DIM};
+        margin-left: 6px;
+    }}
+
+    /* ── Anchor nav strip ── */
+    html {{ scroll-behavior: smooth; }}
+    .ew-nav {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0;
+        border: 1px solid {BORDER};
+        background: {SURFACE};
+        margin-bottom: 26px;
+    }}
+    .ew-nav a {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        color: {MUTED};
+        text-decoration: none;
+        text-transform: uppercase;
+        padding: 9px 14px;
+        border-right: 1px solid {BORDER};
+        transition: color .15s, background .15s;
+    }}
+    .ew-nav a:hover {{ color: {ACCENT}; background: {ACCENT_DIM}; }}
+    .ew-nav a .n {{ color: {ACCENT}; margin-right: 6px; }}
+    .ew-anchor {{ scroll-margin-top: 64px; }}
+
+    /* ── Term tooltips ── */
+    .ew-tip {{
+        border-bottom: 1px dotted {DIM};
+        cursor: help;
+    }}
+
+    /* ── Mobile pass ── */
+    @media (max-width: 740px) {{
+        .ew-metrics  {{ grid-template-columns: repeat(2, 1fr) !important; }}
+        .ew-metrics2 {{ grid-template-columns: repeat(2, 1fr) !important; }}
+        .ew-tldr     {{ grid-template-columns: 1fr 1fr !important; }}
+        .ew-tldr .cell {{ border-bottom: 1px solid {BORDER_HI}; }}
+        .ew-sm-watch, .ew-up-grid {{ overflow-x: auto; }}
+        .ew-sm-row, .ew-up-row {{ min-width: 660px; }}
+        .ew-headline {{ font-size: 34px !important; }}
+        .ew-confront {{ display: block !important; }}
+        .ew-confront .left {{ border-right: none !important; border-bottom: 1px solid {BORDER}; }}
+    }}
+
     /* ── Section header ── */
     .ew-section {{ margin-bottom: 14px; margin-top: 24px; }}
     .ew-section-title {{
@@ -549,6 +839,21 @@ st.markdown(
     }}
     .ew-card.win .ew-card-tag {{ color: {GREEN}; }}
     .ew-card.loss .ew-card-tag {{ color: {RED}; }}
+    .ew-card-lown {{
+        display: inline-block;
+        font-family: 'Space Mono', monospace;
+        font-size: 9px;
+        letter-spacing: 0.12em;
+        color: {ACCENT};
+        border: 1px solid {ACCENT};
+        border-radius: 3px;
+        padding: 1px 5px;
+        margin-left: 8px;
+        opacity: 0.85;
+        text-transform: uppercase;
+        vertical-align: middle;
+        cursor: help;
+    }}
     .ew-card-label {{
         font-family: 'Outfit', sans-serif;
         font-size: 15px;
@@ -1813,6 +2118,20 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "m_per_trade":        {"EN": "per trade avg",       "PT": "média por trade"},
     "m_all_closed":       {"EN": "all closed trades",   "PT": "todos os trades fechados"},
 
+    # Secondary metric row (risk + fee decomposition)
+    "m2_profit_factor":   {"EN": "PROFIT FACTOR",   "PT": "FATOR DE LUCRO"},
+    "m2_pf_sub":          {"EN": "gross wins ÷ gross losses", "PT": "ganhos ÷ perdas brutas"},
+    "m2_max_dd":          {"EN": "MAX DRAWDOWN",    "PT": "DRAWDOWN MÁXIMO"},
+    "m2_dd_sub":          {"EN": "peak → trough",   "PT": "pico → fundo"},
+    "m2_gross":           {"EN": "GROSS PNL",       "PT": "PNL BRUTO"},
+    "m2_gross_sub":       {"EN": "before fees",     "PT": "antes das taxas"},
+    "m2_fees":            {"EN": "FEES PAID",       "PT": "TAXAS PAGAS"},
+    "m2_fees_sub":        {"EN": "{pct}% of gross profit", "PT": "{pct}% do lucro bruto"},
+    "fee_flip":           {
+        "EN": "Your trading is <strong>gross-profitable</strong> ({g}) — but fees ({f}) flip you to {n} net. The edge exists; execution costs are eating it. Fewer, larger entries beat many small ones.",
+        "PT": "Seu trading é <strong>lucrativo no bruto</strong> ({g}) — mas as taxas ({f}) te viram para {n} líquido. O edge existe; os custos de execução estão comendo ele. Menos entradas, maiores, vencem muitas pequenas.",
+    },
+
     # Rank banner
     "rank_top":           {"EN": "TOP {p}%",           "PT": "TOP {p}%"},
     "rank_ranked":        {"EN": 'Ranked <span class="rank">#{rank:,}</span> of <span class="total">{total:,}</span> traders',
@@ -1820,6 +2139,137 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "rank_30d_volume":    {"EN": "30D VOLUME",         "PT": "VOLUME 30D"},
     "rank_sodex_30d_pnl": {"EN": "SODEX 30D PNL",      "PT": "PNL SODEX 30D"},
     "rank_dim_volume":    {"EN": "30D VOLUME",         "PT": "VOLUME 30D"},
+
+    # TL;DR card
+    "tldr_eyebrow":  {"EN": "10-SECOND READ", "PT": "LEITURA DE 10s"},
+    "tldr_dataset":  {"EN": "{n} trades · {days}d", "PT": "{n} trades · {days}d"},
+    "tldr_leak":     {"EN": "Biggest leak",  "PT": "Maior vazamento"},
+    "tldr_edge":     {"EN": "Best edge",     "PT": "Melhor edge"},
+    "tldr_fees":     {"EN": "Fees paid",     "PT": "Taxas pagas"},
+    "tldr_net":      {"EN": "Net PNL",       "PT": "PNL líquido"},
+
+    # Anchor nav
+    "nav_verdict":     {"EN": "Verdict",      "PT": "Veredito"},
+    "nav_confront":    {"EN": "Belief check", "PT": "Crença×Dados"},
+    "nav_waterfall":   {"EN": "Waterfall",    "PT": "Waterfall"},
+    "nav_conditional": {"EN": "Performance",  "PT": "Performance"},
+    "nav_peers":       {"EN": "Top traders",  "PT": "Top traders"},
+    "nav_risk":        {"EN": "Risk filters", "PT": "Filtros de risco"},
+    "nav_smartmoney":  {"EN": "Smart money",  "PT": "Smart money"},
+    "nav_diagnostic":  {"EN": "AI diagnostic","PT": "Diagnóstico IA"},
+
+    # One-click demo
+    "demo_btn":      {"EN": "🎲 No wallet? Try a top trader's →",
+                      "PT": "🎲 Sem carteira? Teste com um top trader →"},
+    "demo_loading":  {"EN": "Finding an active top trader…",
+                      "PT": "Buscando um top trader ativo…"},
+    "demo_failed":   {"EN": "Couldn't fetch the leaderboard right now — paste a wallet instead.",
+                      "PT": "Não consegui buscar o leaderboard agora — cole uma carteira manualmente."},
+
+    # Term tooltips (title attributes)
+    "tip_expectancy": {
+        "EN": "Expectancy = average $ you make (or lose) per trade: winrate × avg win − loss rate × avg loss.",
+        "PT": "Expectativa = quanto você ganha (ou perde) em média por trade: taxa de acerto × ganho médio − taxa de erro × perda média.",
+    },
+    "tip_pf": {
+        "EN": "Profit factor = gross wins ÷ gross losses. Above 1.0 you make more than you lose; prop desks like ≥1.5.",
+        "PT": "Fator de lucro = ganhos brutos ÷ perdas brutas. Acima de 1.0 você ganha mais do que perde; mesas proprietárias gostam de ≥1.5.",
+    },
+    "tip_dd": {
+        "EN": "Max drawdown = the deepest peak-to-trough drop of your cumulative PNL. Your worst losing stretch in dollars.",
+        "PT": "Drawdown máximo = a maior queda pico-a-fundo do seu PNL acumulado. Sua pior sequência perdedora em dólares.",
+    },
+    "tip_gross": {
+        "EN": "What your trading made before trading fees were deducted.",
+        "PT": "O que seu trading rendeu antes de descontar as taxas de negociação.",
+    },
+    "tip_fees": {
+        "EN": "Total trading fees paid across all closed positions in this dataset.",
+        "PT": "Total de taxas de negociação pagas em todas as posições fechadas deste dataset.",
+    },
+    "tip_confidence": {
+        "EN": "Bootstrap probability: we resampled your trades 2,000 times; in this % of resamples the edge bucket beat the bleed bucket. Capped when samples are small.",
+        "PT": "Probabilidade por bootstrap: reamostramos seus trades 2.000 vezes; nessa % das reamostragens o bucket de edge venceu o de ralo. Limitada quando a amostra é pequena.",
+    },
+    "tip_cf_actual": {
+        "EN": "Your real cumulative PNL, as traded.",
+        "PT": "Seu PNL acumulado real, como foi operado.",
+    },
+    "tip_cf_avoided": {
+        "EN": "Simulated equity curve if the trades matching the risk-filter anti-patterns had been skipped.",
+        "PT": "Curva simulada se os trades que caem nos anti-padrões dos filtros de risco tivessem sido evitados.",
+    },
+    "tip_cf_recovered": {
+        "EN": "The dollar difference between the two curves — what those patterns cost you.",
+        "PT": "A diferença em dólares entre as duas curvas — o que esses padrões te custaram.",
+    },
+
+    # Progressive-disclosure expander labels
+    "exp_waterfall": {"EN": "03 · PNL Waterfall — which dimension bleeds most",
+                      "PT": "03 · Waterfall de PNL — qual dimensão mais sangra"},
+    "exp_risk":      {"EN": "06 · Risk filters — your worst 2-dimension combos",
+                      "PT": "06 · Filtros de risco — seus piores combos de 2 dimensões"},
+
+    # Contrarian track record (Wave 3 · Etapa D)
+    "tr_title":      {"EN": "Your history vs the smart-money book",
+                      "PT": "Seu histórico vs o book do smart money"},
+    "tr_sub":        {
+        "EN": "Every trade you opened in the last {days} days, classified by what the qualified top traders were holding <em>at that exact moment</em> — reconstructed from their position history. This is the evidence behind the divergence alert.",
+        "PT": "Cada trade que você abriu nos últimos {days} dias, classificado pelo que os top traders qualificados seguravam <em>naquele exato momento</em> — reconstruído do histórico de posições deles. Essa é a evidência por trás do alerta de divergência.",
+    },
+    "tr_contrarian": {"EN": "⚠ Against the book", "PT": "⚠ Contra o book"},
+    "tr_aligned":    {"EN": "✓ With the book",    "PT": "✓ Com o book"},
+    "tr_nosignal":   {"EN": "— No clear signal",  "PT": "— Sem sinal claro"},
+    "tr_trades":     {"EN": "trades",  "PT": "trades"},
+    "tr_win":        {"EN": "win",     "PT": "acerto"},
+    "tr_exp":        {"EN": "/trade",  "PT": "/trade"},
+    "tr_total":      {"EN": "total",   "PT": "total"},
+    "tr_verdict_bad": {
+        "EN": "Fighting the book costs you <span class='neg'>{contr_exp}</span>/trade vs <span class='pos'>{alig_exp}</span>/trade with it — a <span class='neg'>{gap}</span> gap across {n} contrarian entries. The Discord alert would have pinged you on every one of them.",
+        "PT": "Brigar com o book te custa <span class='neg'>{contr_exp}</span>/trade vs <span class='pos'>{alig_exp}</span>/trade a favor — um gap de <span class='neg'>{gap}</span> em {n} entradas contrárias. O alerta do Discord teria te avisado em cada uma delas.",
+    },
+    "tr_verdict_good": {
+        "EN": "Interesting: your contrarian entries ({contr_exp}/trade) actually outperform your aligned ones ({alig_exp}/trade). You may have genuine fade-the-crowd edge — the alert still helps you take those consciously rather than by accident.",
+        "PT": "Interessante: suas entradas contrárias ({contr_exp}/trade) na verdade superam as alinhadas ({alig_exp}/trade). Você pode ter edge genuíno de ir contra a multidão — o alerta ainda ajuda a tomar essas posições conscientemente, não por acidente.",
+    },
+    "tr_empty":      {
+        "EN": "No trades in the last {days} days overlapped a clear smart-money bias — nothing to classify yet.",
+        "PT": "Nenhum trade nos últimos {days} dias coincidiu com um viés claro do smart money — nada pra classificar ainda.",
+    },
+    "tr_loading":    {"EN": "Reconstructing the smart-money book at your entry times…",
+                      "PT": "Reconstruindo o book do smart money nos seus horários de entrada…"},
+    "tr_caveat":     {
+        "EN": "Method: book reconstructed from the position history (≤1,000 most recent per trader) of today's qualified top traders ({n_traders}); their set may differ from who qualified at trade time. Your own wallet is excluded from the book. Same bias thresholds as the live watch (≥3 traders or 2× notional).",
+        "PT": "Método: book reconstruído do histórico de posições (≤1.000 mais recentes por trader) dos top traders qualificados de hoje ({n_traders}); o conjunto pode diferir de quem qualificava na época do trade. Sua própria carteira é excluída do book. Mesmos limiares de viés do watch ao vivo (≥3 traders ou 2× notional).",
+    },
+
+    # Wave 3 execution layer (simulation)
+    "w3_eyebrow":    {"EN": "⚡ Execution layer · Wave 3 preview · simulation only",
+                      "PT": "⚡ Camada de execução · prévia Wave 3 · apenas simulação"},
+    "w3_close_btn":  {"EN": "⚡ Close {symbol} · SIM", "PT": "⚡ Fechar {symbol} · SIM"},
+    "w3_sim_tag":    {"EN": "SIGNED ORDER · SIMULATION — NOTHING WAS SENT",
+                      "PT": "ORDEM ASSINADA · SIMULAÇÃO — NADA FOI ENVIADO"},
+    "w3_action":     {"EN": "Action",           "PT": "Ação"},
+    "w3_reduce_only":{"EN": "reduce-only",      "PT": "apenas redução"},
+    "w3_signer":     {"EN": "Ephemeral signer", "PT": "Signatário efêmero"},
+    "w3_signature":  {"EN": "Signature (0x01·r·s·v)", "PT": "Assinatura (0x01·r·s·v)"},
+    "w3_digest":     {"EN": "EIP-712 digest",   "PT": "Digest EIP-712"},
+    "w3_note":       {
+        "EN": "<strong>How this works for real:</strong> this exact body, signed via the same EIP-712 pipeline, is what the local execution companion POSTs to SoDEX's /exchange. There it's signed with <strong>your own revocable SoDEX API key</strong> — from your machine, from your .env, never touching our servers. The hosted app only ever simulates with a throwaway key. Every close order is reduce-only by construction: it can shrink risk, never add it.",
+        "PT": "<strong>Como funciona de verdade:</strong> esse body exato, assinado pelo mesmo pipeline EIP-712, é o que o companion local de execução envia pro /exchange da SoDEX. Lá ele é assinado com <strong>sua própria API key revogável da SoDEX</strong> — na sua máquina, do seu .env, sem nunca tocar nossos servidores. O app hospedado só simula com chave descartável. Toda ordem de fechamento é reduce-only por construção: só reduz risco, nunca adiciona.",
+    },
+    "w3_body_label": {"EN": "Exact POST body — what SoDEX /exchange would receive",
+                      "PT": "Body POST exato — o que o /exchange da SoDEX receberia"},
+    "w3_dismiss":    {"EN": "✕ Dismiss simulation", "PT": "✕ Fechar simulação"},
+
+    # Tilt watch banner
+    "tilt_tag":   {"EN": "TILT CHECK", "PT": "CHECAGEM DE TILT"},
+    "tilt_body":  {
+        "EN": "Your last <span class='hi'>{s}</span> trades were losses (most recent {ago}). Historically, your next trade after {bucket} runs <span class='neg'>{exp}</span>/trade across <span class='hi'>{n}</span> samples. Your own data says: step away or cut size.",
+        "PT": "Seus últimos <span class='hi'>{s}</span> trades foram perdas (o mais recente {ago}). Historicamente, seu próximo trade após {bucket} roda <span class='neg'>{exp}</span>/trade em <span class='hi'>{n}</span> amostras. Seus próprios dados dizem: pause ou reduza o tamanho.",
+    },
+    "tilt_ago_h": {"EN": "{h}h ago", "PT": "há {h}h"},
+    "tilt_ago_m": {"EN": "{m}min ago", "PT": "há {m}min"},
 
     # Verdict
     "v_eyebrow":          {"EN": "Verdict · {dim} · {conf}% confidence",
@@ -1967,6 +2417,13 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "rf_footer":        {"EN": "Cross-dimensional setups where your historical expectancy is most extreme. <strong>Avoid</strong> = the worst combos in your sample; <strong>Edge</strong> = your strongest. Treat as a pre-trade checklist.",
                          "PT": "Setups cruzando dimensões onde sua expectativa histórica é mais extrema. <strong>Evite</strong> = os piores combos da sua amostra; <strong>Edge</strong> = os seus mais fortes. Trate como checklist pré-trade."},
 
+    # Low-sample badge (statistical rigor)
+    "cp_low_sample":       {"EN": "n<15", "PT": "n<15"},
+    "cp_low_sample_tip":   {
+        "EN": "Fewer than 15 trades in this bucket — expectancy is noisy. Treat as a hint, not a verdict.",
+        "PT": "Menos de 15 trades nesse bucket — a expectativa é ruidosa. Trate como pista, não veredito.",
+    },
+
     # Risk dim labels
     "rd_hour":     {"EN": "HOUR",    "PT": "HORA"},
     "rd_day":      {"EN": "DAY",     "PT": "DIA"},
@@ -2072,6 +2529,115 @@ def _is_valid_evm_address(addr: str) -> bool:
         return False
 
 
+# URL state must seed session_state BEFORE the data-source section below:
+# the wallet auto-fetch trigger reads url_seed_wallet, and the empty-state
+# st.stop() would otherwise end the script before seeding ever ran (which
+# silently broke bookmarked ?w= links on cold sessions).
+# --------------------------------------------------------------------------- #
+# URL state — slicer filters + active wallet persist in query params so the
+# whole view is shareable / bookmarkable.
+# --------------------------------------------------------------------------- #
+
+# Slicer filter values that go into the URL (?f_hour=14&f_side=long&…). The
+# parser converts the URL string back to the type the slicer widget expects.
+_URL_FILTER_PARSERS = {
+    "hour":   int,
+    "day":    int,
+    "side":   str,
+    "symbol": str,
+    "streak": str,
+    "size":   str,
+    "hold":   str,
+    "regime": str,
+}
+
+
+def _seed_state_from_url() -> None:
+    """Populate session state from URL query params before widgets render.
+
+    Runs once at the top of every script execution. Only seeds keys that
+    don't already exist in session_state — that way user interactions
+    (which write to session_state) always win over the URL.
+    """
+    qp = st.query_params
+
+    # Wallet address (`?w=0x…`) — pre-fills the input + flags an auto-fetch
+    raw_wallet = qp.get("w")
+    if isinstance(raw_wallet, list):
+        raw_wallet = raw_wallet[0] if raw_wallet else None
+    if raw_wallet and _is_valid_evm_address(raw_wallet):
+        if "active_address" not in st.session_state:
+            st.session_state["active_address"] = raw_wallet
+        if "url_seed_wallet" not in st.session_state:
+            st.session_state["url_seed_wallet"] = raw_wallet
+
+    # Slicer filters (`?f_hour=14&f_side=long&…`)
+    for key, parser in _URL_FILTER_PARSERS.items():
+        sess_key = f"slicer_{key}"
+        if sess_key in st.session_state:
+            continue
+        raw = qp.get(f"f_{key}")
+        if isinstance(raw, list):
+            raw = raw[0] if raw else None
+        if raw is None or raw == "":
+            continue
+        try:
+            st.session_state[sess_key] = parser(raw)
+        except (ValueError, TypeError):
+            continue
+
+
+def _sync_state_to_url() -> None:
+    """Write current slicer + wallet state back to URL query params.
+
+    Only writes when the new state differs from what's currently in the
+    URL — avoids triggering an unnecessary rerun loop.
+    """
+    new_qp: dict[str, str] = {}
+
+    # Active wallet
+    addr = (st.session_state.get("active_address") or "").strip()
+    if addr:
+        new_qp["w"] = addr
+
+    # Filters
+    for key in _URL_FILTER_PARSERS:
+        val = st.session_state.get(f"slicer_{key}")
+        if val is not None and val != "":
+            new_qp[f"f_{key}"] = str(val)
+
+    # UI language
+    lang = st.session_state.get("lang")
+    if lang and lang != _LANG_DEFAULT and lang in _LANG_OPTIONS:
+        new_qp["lang"] = lang
+
+    # Compare against current params (only the keys we manage).
+    managed_keys = {"w", "lang", *(f"f_{k}" for k in _URL_FILTER_PARSERS)}
+    current = {
+        k: (v[0] if isinstance(v, list) else v)
+        for k, v in st.query_params.items()
+        if k in managed_keys
+    }
+    if current == new_qp:
+        return
+
+    # Preserve any unmanaged params (analytics, etc.) just in case.
+    preserved = {
+        k: (v[0] if isinstance(v, list) else v)
+        for k, v in st.query_params.items()
+        if k not in managed_keys
+    }
+    final = {**preserved, **new_qp}
+    st.query_params.clear()
+    for k, v in final.items():
+        st.query_params[k] = v
+
+
+_seed_state_from_url()
+
+
+
+
 with st.sidebar:
     st.header("Trade history")
 
@@ -2140,6 +2706,41 @@ if source == "From wallet address":
         )
     with col_btn:
         fetch_clicked = st.button(_t("wallet_fetch"), use_container_width=True)
+
+    # One-click demo: pull an active top trader from the leaderboard and load
+    # their wallet through the exact same fetch pipeline. Zero-friction first
+    # contact for visitors without a SoDEX wallet of their own.
+    _demo_clicked = st.button(_t("demo_btn"), key="demo_top_trader_btn")
+    if _demo_clicked:
+        try:
+            from edgework.sodex_client import SodexClient
+
+            with st.spinner(_t("demo_loading")):
+                with SodexClient(
+                    user_address="0x0000000000000000000000000000000000000000"
+                ) as _dc:
+                    _lb = _dc.get_leaderboard(
+                        window_type="30d", sort_by="volume",
+                        sort_order="desc", page=1, page_size=10,
+                    )
+            _demo_addr = None
+            for _it in (_lb.get("items", []) or []):
+                # Prefer active traders that are also profitable in window.
+                if _it.get("wallet_address") and float(_it.get("pnl_usd", 0) or 0) > 0:
+                    _demo_addr = _it["wallet_address"]
+                    break
+            if _demo_addr is None:  # fall back to plain top volume
+                for _it in (_lb.get("items", []) or []):
+                    if _it.get("wallet_address"):
+                        _demo_addr = _it["wallet_address"]
+                        break
+            if _demo_addr:
+                st.session_state["url_seed_wallet"] = _demo_addr
+                st.rerun()
+            else:
+                st.warning(_t("demo_failed"))
+        except Exception:  # noqa: BLE001
+            st.warning(_t("demo_failed"))
 
     # Auto-trigger fetch when URL pre-loaded a wallet we don't have cached yet.
     # The seed flag is consumed on first use so reloads don't re-fetch.
@@ -2310,109 +2911,6 @@ if trades is None or trades.empty:
         "or a realized PNL field."
     )
     st.stop()
-
-
-# --------------------------------------------------------------------------- #
-# URL state — slicer filters + active wallet persist in query params so the
-# whole view is shareable / bookmarkable.
-# --------------------------------------------------------------------------- #
-
-# Slicer filter values that go into the URL (?f_hour=14&f_side=long&…). The
-# parser converts the URL string back to the type the slicer widget expects.
-_URL_FILTER_PARSERS = {
-    "hour":   int,
-    "day":    int,
-    "side":   str,
-    "symbol": str,
-    "streak": str,
-    "size":   str,
-    "hold":   str,
-    "regime": str,
-}
-
-
-def _seed_state_from_url() -> None:
-    """Populate session state from URL query params before widgets render.
-
-    Runs once at the top of every script execution. Only seeds keys that
-    don't already exist in session_state — that way user interactions
-    (which write to session_state) always win over the URL.
-    """
-    qp = st.query_params
-
-    # Wallet address (`?w=0x…`) — pre-fills the input + flags an auto-fetch
-    raw_wallet = qp.get("w")
-    if isinstance(raw_wallet, list):
-        raw_wallet = raw_wallet[0] if raw_wallet else None
-    if raw_wallet and _is_valid_evm_address(raw_wallet):
-        if "active_address" not in st.session_state:
-            st.session_state["active_address"] = raw_wallet
-        if "url_seed_wallet" not in st.session_state:
-            st.session_state["url_seed_wallet"] = raw_wallet
-
-    # Slicer filters (`?f_hour=14&f_side=long&…`)
-    for key, parser in _URL_FILTER_PARSERS.items():
-        sess_key = f"slicer_{key}"
-        if sess_key in st.session_state:
-            continue
-        raw = qp.get(f"f_{key}")
-        if isinstance(raw, list):
-            raw = raw[0] if raw else None
-        if raw is None or raw == "":
-            continue
-        try:
-            st.session_state[sess_key] = parser(raw)
-        except (ValueError, TypeError):
-            continue
-
-
-def _sync_state_to_url() -> None:
-    """Write current slicer + wallet state back to URL query params.
-
-    Only writes when the new state differs from what's currently in the
-    URL — avoids triggering an unnecessary rerun loop.
-    """
-    new_qp: dict[str, str] = {}
-
-    # Active wallet
-    addr = (st.session_state.get("active_address") or "").strip()
-    if addr:
-        new_qp["w"] = addr
-
-    # Filters
-    for key in _URL_FILTER_PARSERS:
-        val = st.session_state.get(f"slicer_{key}")
-        if val is not None and val != "":
-            new_qp[f"f_{key}"] = str(val)
-
-    # UI language
-    lang = st.session_state.get("lang")
-    if lang and lang != _LANG_DEFAULT and lang in _LANG_OPTIONS:
-        new_qp["lang"] = lang
-
-    # Compare against current params (only the keys we manage).
-    managed_keys = {"w", "lang", *(f"f_{k}" for k in _URL_FILTER_PARSERS)}
-    current = {
-        k: (v[0] if isinstance(v, list) else v)
-        for k, v in st.query_params.items()
-        if k in managed_keys
-    }
-    if current == new_qp:
-        return
-
-    # Preserve any unmanaged params (analytics, etc.) just in case.
-    preserved = {
-        k: (v[0] if isinstance(v, list) else v)
-        for k, v in st.query_params.items()
-        if k not in managed_keys
-    }
-    final = {**preserved, **new_qp}
-    st.query_params.clear()
-    for k, v in final.items():
-        st.query_params[k] = v
-
-
-_seed_state_from_url()
 
 
 
@@ -2999,6 +3497,124 @@ if _active_addr_for_rank:
 
 
 # --------------------------------------------------------------------------- #
+# TL;DR card — the 10-second read. Deterministic, computed from slices.
+# --------------------------------------------------------------------------- #
+
+def _render_tldr(trades_df: pd.DataFrame, slices_dict: dict, ov) -> None:
+    """First thing a new visitor reads: dataset size, biggest leak, best edge,
+    fees. No AI, no scroll required — the page's thesis in one strip."""
+    if trades_df is None or trades_df.empty or ov.n_trades == 0:
+        return
+
+    # Self-contained label formatters (the verdict's _DIM_VERDICT lives
+    # further down the script; Streamlit executes top-down).
+    _fmt_by_dim = {
+        "hour_of_day":        ("hour",          lambda v: f"{int(v):02d}:00 UTC"),
+        "consecutive_losses": ("streak_bucket", lambda v: str(v).upper()),
+        "size_quartile":      ("size_quartile", lambda v: str(v).upper()),
+        "hold_duration":      ("hold_bucket",   lambda v: str(v).upper()),
+        "side":               ("side",          lambda v: str(v).upper()),
+        "symbol":             ("symbol",        str),
+        "regime":             ("regime",        lambda v: str(v).upper()),
+    }
+
+    leak = edge = None  # (label, total_pnl, n)
+    # A bucket that contains nearly the whole dataset (e.g. "DOWNTREND" when
+    # 100% of trades happened in a downtrend) isn't an actionable edge — it's
+    # just the dataset. Only consider buckets below this share of all trades.
+    _max_share = 0.8 * ov.n_trades
+    for dim_key, df in (slices_dict or {}).items():
+        cfg = _fmt_by_dim.get(dim_key)
+        if cfg is None or df is None or df.empty:
+            continue
+        key_col, fmt = cfg
+        if key_col not in df.columns or "total_pnl" not in df.columns:
+            continue
+        sig = df[(df["n_trades"] >= 5) & (df["n_trades"] <= _max_share)]
+        if sig.empty:
+            continue
+        lo = sig.loc[sig["total_pnl"].idxmin()]
+        hi = sig.loc[sig["total_pnl"].idxmax()]
+        if float(lo["total_pnl"]) < 0 and (leak is None or float(lo["total_pnl"]) < leak[1]):
+            leak = (fmt(lo[key_col]), float(lo["total_pnl"]), int(lo["n_trades"]))
+        if float(hi["total_pnl"]) > 0 and (edge is None or float(hi["total_pnl"]) > edge[1]):
+            edge = (fmt(hi[key_col]), float(hi["total_pnl"]), int(hi["n_trades"]))
+
+    span_days = 0
+    if "closed_at" in trades_df.columns and trades_df["closed_at"].notna().any():
+        span = trades_df["closed_at"].max() - trades_df["closed_at"].min()
+        span_days = max(1, int(span.days))
+
+    has_fees = "fees" in trades_df.columns and trades_df["fees"].notna().any()
+    fees_total = float(trades_df["fees"].fillna(0).sum()) if has_fees else 0.0
+
+    def _m(x: float) -> str:
+        sign = "−" if x < 0 else "+"
+        return f"{sign}${abs(x):,.0f}"
+
+    leak_html = (
+        f'<span class="neg">{leak[0]} → {_m(leak[1])}</span><small>{leak[2]:,} trades</small>'
+        if leak else "—"
+    )
+    edge_html = (
+        f'<span class="pos">{edge[0]} → {_m(edge[1])}</span><small>{edge[2]:,} trades</small>'
+        if edge else "—"
+    )
+    # 4th cell: fees when available, net PNL otherwise.
+    if has_fees and fees_total > 0:
+        last_k, last_v = _t("tldr_fees"), f'<span class="neg">−${fees_total:,.0f}</span>'
+    else:
+        net = float(ov.total_pnl)
+        cls = "pos" if net >= 0 else "neg"
+        last_k, last_v = _t("tldr_net"), f'<span class="{cls}">{_m(net)}</span>'
+
+    st.markdown(
+        '<div class="ew-tldr">'
+        '<div class="cell">'
+        f'<span class="k">— {_t("tldr_eyebrow")}</span>'
+        f'<span class="v">{_t("tldr_dataset", n=f"{ov.n_trades:,}", days=span_days)}</span>'
+        '</div>'
+        '<div class="cell">'
+        f'<span class="k">{_t("tldr_leak")}</span>'
+        f'<span class="v">{leak_html}</span>'
+        '</div>'
+        '<div class="cell">'
+        f'<span class="k">{_t("tldr_edge")}</span>'
+        f'<span class="v">{edge_html}</span>'
+        '</div>'
+        '<div class="cell">'
+        f'<span class="k">{last_k}</span>'
+        f'<span class="v">{last_v}</span>'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+def _render_anchor_nav() -> None:
+    """Numbered jump-links that give the long page a navigable spine."""
+    items = [
+        ("sec-verdict",     "01", _t("nav_verdict")),
+        ("sec-confront",    "02", _t("nav_confront")),
+        ("sec-waterfall",   "03", _t("nav_waterfall")),
+        ("sec-conditional", "04", _t("nav_conditional")),
+        ("sec-peers",       "05", _t("nav_peers")),
+        ("sec-risk",        "06", _t("nav_risk")),
+        ("sec-smartmoney",  "07", _t("nav_smartmoney")),
+        ("sec-diagnostic",  "08", _t("nav_diagnostic")),
+    ]
+    links = "".join(
+        f'<a href="#{anchor}"><span class="n">{num}</span>{label}</a>'
+        for anchor, num, label in items
+    )
+    st.markdown(f'<div class="ew-nav">{links}</div>', unsafe_allow_html=True)
+
+
+_render_tldr(trades, slices, overall)
+_render_anchor_nav()
+
+
+# --------------------------------------------------------------------------- #
 # Top metric row
 # --------------------------------------------------------------------------- #
 
@@ -3024,7 +3640,7 @@ st.markdown(
             <div class="ew-metric-glow"></div>
         </div>
         <div class="ew-metric">
-            <div class="ew-metric-label">{_t("m_expectancy")}</div>
+            <div class="ew-metric-label"><span class="ew-tip" title="{_t('tip_expectancy')}">{_t("m_expectancy")}</span></div>
             <div class="ew-metric-value {exp_cls}">{exp_sign}${overall.expectancy:,.2f}</div>
             <div class="ew-metric-sub">{_t("m_per_trade")}</div>
             <div class="ew-metric-glow"></div>
@@ -3039,6 +3655,183 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
+
+
+# ── Secondary metric row: profit factor · max drawdown · gross PNL · fees ──
+def _render_risk_metrics_row(trades_df: pd.DataFrame) -> None:
+    """Prop-desk numbers the headline row doesn't show.
+
+    Profit factor and max drawdown are the first two numbers any prop firm
+    checks. The gross/fees split surfaces the cost of execution — many
+    high-frequency accounts are gross-profitable and net-negative, which is
+    invisible when you only show realized (net) PNL.
+    """
+    if trades_df is None or trades_df.empty or "pnl" not in trades_df.columns:
+        return
+
+    # Local formatter — _money_int is defined further down the script and
+    # Streamlit executes top-down, so referencing it here would NameError.
+    def _fmt_signed(x: float) -> str:
+        sign = "−" if x < 0 else ("+" if x > 0 else "")
+        return f"{sign}${abs(x):,.0f}"
+
+    pnl = trades_df["pnl"].dropna()
+    if pnl.empty:
+        return
+
+    wins_sum = float(pnl[pnl > 0].sum())
+    losses_sum = abs(float(pnl[pnl <= 0].sum()))
+    if losses_sum > 0:
+        pf_str = f"{wins_sum / losses_sum:.2f}"
+        pf_cls = "pos" if wins_sum / losses_sum >= 1 else "neg"
+    else:
+        pf_str, pf_cls = "∞", "pos"
+
+    # Max drawdown on the chronological cumulative PNL curve.
+    if "closed_at" in trades_df.columns:
+        eq = trades_df.sort_values("closed_at")["pnl"].cumsum()
+    else:
+        eq = pnl.cumsum()
+    dd = float((eq.cummax() - eq).max()) if len(eq) else 0.0
+    dd_cls = "neg" if dd > 0 else ""
+
+    # Fees decomposition — only when the fees column made it through.
+    has_fees = "fees" in trades_df.columns and trades_df["fees"].notna().any()
+    fees_total = float(trades_df["fees"].fillna(0).sum()) if has_fees else 0.0
+    net_total = float(pnl.sum())
+    gross_total = net_total + fees_total
+    gross_cls = "pos" if gross_total >= 0 else "neg"
+    fee_pct = (fees_total / gross_total * 100) if gross_total > 0 else None
+
+    if has_fees and fees_total > 0:
+        gross_cell = (
+            '<div class="ew-metric2">'
+            f'<span class="k ew-tip" title="{_t("tip_gross")}">{_t("m2_gross")}</span>'
+            f'<span class="v {gross_cls}">{_fmt_signed(gross_total)}</span>'
+            f'<span class="s">{_t("m2_gross_sub")}</span>'
+            '</div>'
+        )
+        fee_sub = _t("m2_fees_sub", pct=f"{fee_pct:.0f}") if fee_pct is not None else ""
+        fees_cell = (
+            '<div class="ew-metric2">'
+            f'<span class="k ew-tip" title="{_t("tip_fees")}">{_t("m2_fees")}</span>'
+            f'<span class="v neg">−${fees_total:,.0f}</span>'
+            f'<span class="s">{fee_sub}</span>'
+            '</div>'
+        )
+    else:
+        gross_cell = fees_cell = '<div class="ew-metric2"></div>'
+
+    st.markdown(
+        '<div class="ew-metrics2">'
+        '<div class="ew-metric2">'
+        f'<span class="k ew-tip" title="{_t("tip_pf")}">{_t("m2_profit_factor")}</span>'
+        f'<span class="v {pf_cls}">{pf_str}</span>'
+        f'<span class="s">{_t("m2_pf_sub")}</span>'
+        '</div>'
+        '<div class="ew-metric2">'
+        f'<span class="k ew-tip" title="{_t("tip_dd")}">{_t("m2_max_dd")}</span>'
+        f'<span class="v {dd_cls}">−${dd:,.0f}</span>'
+        f'<span class="s">{_t("m2_dd_sub")}</span>'
+        '</div>'
+        f'{gross_cell}{fees_cell}'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    # The killer insight: gross-profitable but net-negative.
+    if has_fees and gross_total > 0 and net_total < 0:
+        st.markdown(
+            '<div class="ew-fee-flip">⚠ '
+            + _t(
+                "fee_flip",
+                g=_fmt_signed(gross_total),
+                f=f"−${fees_total:,.0f}",
+                n=_fmt_signed(net_total),
+            )
+            + '</div>',
+            unsafe_allow_html=True,
+        )
+
+
+_render_risk_metrics_row(trades)
+
+
+# ── Tilt check: current loss streak × your own historical streak stats ──────
+def _render_tilt_banner(trades_df: pd.DataFrame, slices_dict: dict) -> None:
+    """One-line, data-only warning when the trader is in a live loss streak.
+
+    Deliberately conservative — fires only when ALL hold:
+      - the most recent 2+ closed trades are consecutive losses,
+      - the latest loss closed within the last 24h (a stale streak is noise),
+      - the trader's own history has n>=5 trades in the matching streak
+        bucket AND negative expectancy there.
+    No moralizing: it cites the trader's own numbers and stops. Positive
+    or unsupported streak stats render nothing.
+    """
+    if trades_df is None or trades_df.empty:
+        return
+    if "pnl" not in trades_df.columns or "closed_at" not in trades_df.columns:
+        return
+
+    recent = trades_df.dropna(subset=["pnl", "closed_at"]).sort_values("closed_at")
+    if recent.empty:
+        return
+
+    # Current streak: walk back from the most recent close.
+    streak = 0
+    for pnl in recent["pnl"].iloc[::-1]:
+        if pnl <= 0:
+            streak += 1
+        else:
+            break
+    if streak < 2:
+        return
+
+    last_close = recent["closed_at"].iloc[-1]
+    now = pd.Timestamp.now(tz="UTC")
+    if last_close.tzinfo is None:
+        last_close = last_close.tz_localize("UTC")
+    age = now - last_close
+    if age > pd.Timedelta(hours=24):
+        return  # stale streak — not a live session signal
+
+    bucket = "2L" if streak == 2 else ("3L" if streak == 3 else "4L+")
+
+    streak_df = slices_dict.get("consecutive_losses")
+    if streak_df is None or streak_df.empty or "streak_bucket" not in streak_df.columns:
+        return
+    row = streak_df[streak_df["streak_bucket"].astype(str) == bucket]
+    if row.empty:
+        return
+    row = row.iloc[0]
+    n_hist = int(row["n_trades"])
+    exp_hist = float(row["expectancy"])
+    if n_hist < 5 or exp_hist >= 0:
+        return  # not statistically supported, or streaks aren't a problem for them
+
+    mins = int(age.total_seconds() // 60)
+    ago = _t("tilt_ago_m", m=mins) if mins < 60 else _t("tilt_ago_h", h=mins // 60)
+
+    st.markdown(
+        '<div class="ew-tilt">'
+        f'<span class="tag">⚠ {_t("tilt_tag")}</span>'
+        '<span>'
+        + _t(
+            "tilt_body",
+            s=streak,
+            ago=ago,
+            bucket=bucket,
+            exp=f"−${abs(exp_hist):,.2f}",
+            n=n_hist,
+        )
+        + '</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
+_render_tilt_banner(trades, slices)
 
 
 # --------------------------------------------------------------------------- #
@@ -3339,15 +4132,15 @@ if _close_col is not None and _pnl_col is not None:
             <div class="ew-chart-label">{_t("eq_label_with_cf")}</div>
             <div class="ew-cf-strip">
                 <span class="cell">
-                    <span class="k">{_t("cf_actual")}</span>
+                    <span class="k ew-tip" title="{_t('tip_cf_actual')}">{_t("cf_actual")}</span>
                     <span class="v {_actual_cls}">{'+' if _actual_total>=0 else '−'}${abs(_actual_total):,.0f}</span>
                 </span>
                 <span class="cell">
-                    <span class="k">{_t("cf_if_avoided")} · {_avoided_labels}</span>
+                    <span class="k ew-tip" title="{_t('tip_cf_avoided')}">{_t("cf_if_avoided")} · {_avoided_labels}</span>
                     <span class="v {_cf_cls}">{'+' if _cf_total>=0 else '−'}${abs(_cf_total):,.0f}</span>
                 </span>
                 <span class="cell">
-                    <span class="k">{_t("cf_recovered")} ({_n_avoided} {_t("cf_trades_skipped")})</span>
+                    <span class="k ew-tip" title="{_t('tip_cf_recovered')}">{_t("cf_recovered")} ({_n_avoided} {_t("cf_trades_skipped")})</span>
                     <span class="v {_delta_cls}">{'+' if _delta>=0 else '−'}${abs(_delta):,.0f}</span>
                 </span>
             </div>
@@ -3392,6 +4185,9 @@ def _money_int(x: float) -> str:
     return f"{sign}${abs(x):,.0f}"
 
 
+LOW_SAMPLE_N = 15  # below this, bucket expectancy is treated as noisy
+
+
 def _stat_card(
     tag: str, label: str, value: float, n_trades: int,
     winrate: float, total_pnl: float, *, kind: str,
@@ -3401,9 +4197,13 @@ def _stat_card(
     total_class = "pos" if total_pnl >= 0 else "neg"
     wr_class = "pos" if winrate >= 0.5 else "neg"
     wr_width = f"{winrate * 100:.1f}"
+    low_badge = (
+        f'<span class="ew-card-lown" title="{_t("cp_low_sample_tip")}">⚠ {_t("cp_low_sample")}</span>'
+        if n_trades < LOW_SAMPLE_N else ""
+    )
     return (
         f'<div class="ew-card {kind_class}">'
-        f'  <div class="ew-card-tag">{tag}</div>'
+        f'  <div class="ew-card-tag">{tag}{low_badge}</div>'
         f'  <div class="ew-card-label">{label}</div>'
         f'  <div class="ew-card-value {value_class}">{_money(value)}</div>'
         f'  <div class="ew-wr-track">'
@@ -3777,11 +4577,70 @@ def _money_signed(x: float) -> str:
     return "$0"
 
 
-def _verdict_dimension(slices_dict: dict):
+# Dimension → trades-DataFrame column holding the per-trade bucket value.
+# hour_of_day is derived from opened_at; the _-prefixed columns come from
+# _add_bucket_columns; regime from _attach_regime.
+_DIM_TRADE_COL = {
+    "consecutive_losses": "_streak_b",
+    "size_quartile":      "_size_q",
+    "hold_duration":      "_hold_b",
+    "side":               "side",
+    "symbol":             "symbol",
+    "regime":             "regime",
+}
+
+
+def _bucket_pnls(trades_df: pd.DataFrame, dim_key: str, bucket_value) -> np.ndarray | None:
+    """Per-trade PNLs of one bucket of one dimension, or None if unavailable."""
+    if trades_df is None or trades_df.empty or "pnl" not in trades_df.columns:
+        return None
+    if dim_key == "hour_of_day":
+        if "opened_at" not in trades_df.columns:
+            return None
+        mask = trades_df["opened_at"].dt.hour == int(bucket_value)
+    else:
+        col = _DIM_TRADE_COL.get(dim_key)
+        if col is None or col not in trades_df.columns:
+            return None
+        mask = trades_df[col].astype(str) == str(bucket_value)
+    pnls = trades_df.loc[mask, "pnl"].dropna().to_numpy(dtype=float)
+    return pnls if len(pnls) >= 2 else None
+
+
+def _bootstrap_confidence(
+    pnl_best: np.ndarray,
+    pnl_worst: np.ndarray,
+    n_iter: int = 2000,
+) -> int:
+    """Bootstrap probability (%) that the edge bucket genuinely beats the bleed.
+
+    Resamples each bucket's trades with replacement n_iter times and measures
+    how often the edge bucket's mean PNL exceeds the bleed bucket's. This is a
+    real statistical statement — "in X% of resamples the edge held" — unlike a
+    sample-size heuristic. Seeded for reproducibility.
+
+    Small-sample honesty cap: a bootstrap only resamples the observed points,
+    so with tiny buckets it can't see how noisy the sample mean itself is and
+    will overstate certainty. We cap the reported confidence by the smaller
+    bucket's size — n=5 caps at 80%, n=10 at 90%, n≥15 uncapped (max 99%).
+    """
+    rng = np.random.default_rng(42)
+    b = rng.choice(pnl_best, size=(n_iter, len(pnl_best)), replace=True).mean(axis=1)
+    w = rng.choice(pnl_worst, size=(n_iter, len(pnl_worst)), replace=True).mean(axis=1)
+    prob = float((b > w).mean())
+    cap = min(99, 70 + 2 * min(len(pnl_best), len(pnl_worst)))
+    return min(cap, max(50, round(prob * 100)))
+
+
+def _verdict_dimension(slices_dict: dict, trades_df: pd.DataFrame | None = None):
     """Find the dimension with the strongest expectancy spread.
 
     Returns (dim_key, best_row, worst_row, spread, confidence_pct) or None
     if no dimension has at least 2 slices with n_trades >= 5.
+
+    Confidence is a bootstrap probability computed from the winning
+    dimension's raw per-trade PNLs (see _bootstrap_confidence). Falls back
+    to a sample-size heuristic only when raw trades aren't available.
     """
     winner = None
     for dim_key, df in slices_dict.items():
@@ -3795,12 +4654,25 @@ def _verdict_dimension(slices_dict: dict):
         best  = sig.loc[sig["expectancy"].idxmax()]
         worst = sig.loc[sig["expectancy"].idxmin()]
         spread = float(best["expectancy"]) - float(worst["expectancy"])
-        n_combined = int(best["n_trades"]) + int(worst["n_trades"])
-        # Confidence — coarse heuristic, just sample-size based.
-        conf = min(96, 50 + n_combined // 2)
         if winner is None or spread > winner[3]:
-            winner = (dim_key, best, worst, spread, conf)
-    return winner
+            winner = (dim_key, best, worst, spread, None)
+
+    if winner is None:
+        return None
+
+    dim_key, best, worst, spread, _ = winner
+    _, key_col, _fmt = _DIM_VERDICT[dim_key]
+    conf = None
+    if trades_df is not None:
+        pnl_best = _bucket_pnls(trades_df, dim_key, best[key_col])
+        pnl_worst = _bucket_pnls(trades_df, dim_key, worst[key_col])
+        if pnl_best is not None and pnl_worst is not None:
+            conf = _bootstrap_confidence(pnl_best, pnl_worst)
+    if conf is None:
+        # Heuristic fallback (no raw trades) — sample-size based.
+        n_combined = int(best["n_trades"]) + int(worst["n_trades"])
+        conf = min(96, 50 + n_combined // 2)
+    return (dim_key, best, worst, spread, conf)
 
 
 def _verdict_instruction(dim_key: str, best, worst) -> str:
@@ -3838,12 +4710,12 @@ def _verdict_instruction(dim_key: str, best, worst) -> str:
     return f"Evite {worst_label}." if pt else f"Avoid {worst_label}."
 
 
-def _render_verdict(slices_dict, overall) -> None:
-    v = _verdict_dimension(slices_dict)
+def _render_verdict(slices_dict, overall, trades_df: pd.DataFrame | None = None) -> None:
+    v = _verdict_dimension(slices_dict, trades_df)
     if v is None:
         st.markdown(
             f"""
-            <section class="ew-verdict">
+            <section id="sec-verdict" class="ew-verdict ew-anchor">
                 <div class="ew-verdict-eyebrow">
                     {("VEREDITO" if _current_lang() == "PT" else "VERDICT")} · <span class="v">{("sinal insuficiente" if _current_lang() == "PT" else "not enough signal")}</span>
                 </div>
@@ -3884,9 +4756,9 @@ def _render_verdict(slices_dict, overall) -> None:
     _conf_word = "CONFIANÇA" if _current_lang() == "PT" else "CONFIDENCE"
 
     html = f"""
-    <section class="ew-verdict">
+    <section id="sec-verdict" class="ew-verdict ew-anchor">
         <div class="ew-verdict-eyebrow">
-            {_verdict_word} · <span class="v">{dim_label}</span> · {conf}% {_conf_word}
+            {_verdict_word} · <span class="v">{dim_label}</span> · <span class="ew-tip" title="{_t('tip_confidence')}">{conf}% {_conf_word}</span>
         </div>
         <div class="ew-verdict-grid">
             <div class="ew-verdict-col">
@@ -4035,7 +4907,7 @@ def _render_confrontation(slices_dict) -> None:
         )
 
     html = f"""
-    <section class="ew-confront">
+    <section id="sec-confront" class="ew-confront ew-anchor">
         <div class="left">
             <h3>{_t("c_what_you_believe")}</h3>
             <div class="ew-conf-stmt">{belief}</div>
@@ -4384,18 +5256,39 @@ def _fetch_cohort_benchmark(window_type: str = "30d", n_traders: int = 5) -> dic
         result["error"] = f"leaderboard fetch: {e}"
         return result
 
-    for item in result["leaderboard"][:n_traders]:
-        addr = item.get("wallet_address")
-        if not addr:
-            continue
+    # Parallel history fetch — 5 paginated pulls in series is the slowest
+    # part of the page on a cold cache. Aggregation keeps leaderboard order.
+    from concurrent.futures import ThreadPoolExecutor as _TPE
+
+    def _fetch_history(addr: str):
         try:
             with SodexClient(user_address=addr) as cc:
-                positions = cc.get_position_history_paginated(
+                return addr, cc.get_position_history_paginated(
                     start_ms=start_ms,
                     end_ms=end_ms,
                     page_limit=500,
                     max_pages=3,
                 )
+        except Exception:  # noqa: BLE001
+            return addr, None
+
+    _lb_addrs = [
+        it.get("wallet_address")
+        for it in result["leaderboard"][:n_traders]
+        if it.get("wallet_address")
+    ]
+    _hist_by_addr: dict[str, object] = {}
+    if _lb_addrs:
+        with _TPE(max_workers=min(5, len(_lb_addrs))) as _pool:
+            for _addr, _hist in _pool.map(_fetch_history, _lb_addrs):
+                _hist_by_addr[_addr] = _hist
+
+    for item in result["leaderboard"][:n_traders]:
+        addr = item.get("wallet_address")
+        if not addr:
+            continue
+        try:
+            positions = _hist_by_addr.get(addr)
             if not positions:
                 continue
             df = slicer.normalize_orders(positions)
@@ -4494,6 +5387,26 @@ def _fetch_smart_money_consensus(n_top: int = 20, window: str = "30d") -> dict:
     consensus: dict[str, dict] = {}
     trader_infos: list[dict] = []
 
+    # Fan the per-trader open-position fetches out in parallel — 20 wallets
+    # sequentially is 8-15s of cold-cache spinner; parallel it's ~1.5s.
+    # Results land in a dict keyed by addr so aggregation below stays in
+    # deterministic `qualified` order.
+    from concurrent.futures import ThreadPoolExecutor
+
+    def _fetch_open(addr: str):
+        try:
+            with SodexClient(user_address=addr) as cc:
+                return addr, cc.get_open_positions()
+        except Exception:  # noqa: BLE001 — one bad wallet must not kill the watch
+            return addr, None
+
+    addrs = [it.get("wallet_address") for it in qualified if it.get("wallet_address")]
+    open_by_addr: dict[str, object] = {}
+    if addrs:
+        with ThreadPoolExecutor(max_workers=min(8, len(addrs))) as pool:
+            for addr, data in pool.map(_fetch_open, addrs):
+                open_by_addr[addr] = data
+
     for item in qualified:
         addr = item.get("wallet_address")
         if not addr:
@@ -4506,10 +5419,8 @@ def _fetch_smart_money_consensus(n_top: int = 20, window: str = "30d") -> dict:
         }
         trader_infos.append(trader)
 
-        try:
-            with SodexClient(user_address=addr) as cc:
-                open_data = cc.get_open_positions()
-        except Exception:  # noqa: BLE001
+        open_data = open_by_addr.get(addr)
+        if open_data is None:
             continue
 
         # Open positions can come as {positions: [...]} or just [...] depending
@@ -4723,6 +5634,125 @@ def _classify_user_vs_smart_money(
     )
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def _fetch_symbol_ids() -> dict[str, int]:
+    """symbol → numeric SoDEX symbolID, needed to build order params.
+
+    Field name for the id varies across gateway versions — try the known
+    spellings. Empty dict on failure (simulation then uses 0, which is fine:
+    nothing is transmitted)."""
+    try:
+        from edgework.sodex_client import SodexClient
+
+        with SodexClient(
+            user_address="0x0000000000000000000000000000000000000000"
+        ) as c:
+            syms = c.get_perps_symbols()
+        out: dict[str, int] = {}
+        for s in syms or []:
+            # Live gateway uses `name` + `id` (verified 2026-06); keep the
+            # alternate spellings as fallbacks for other gateway versions.
+            name = s.get("name") or s.get("symbol") or s.get("displayName")
+            sid = s.get("id") or s.get("symbolID") or s.get("symbolId")
+            if name and sid is not None:
+                out[str(name)] = int(sid)
+        return out
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _render_w3_execution_layer(action_items: list[tuple[dict, str]]) -> None:
+    """Wave 3 preview: per-position close buttons that build and sign a real
+    EIP-712 reduce-only order with an ephemeral key — and send nothing.
+
+    Proves the full insight→action pipeline (payload hashing, struct hashing,
+    domain separation, ECDSA, wire format) with zero custody risk. The local
+    execution companion reuses the identical code path with a real key.
+    """
+    if not action_items:
+        return
+
+    st.markdown(
+        f'<div class="ew-sim-eyebrow">{_t("w3_eyebrow")}</div>',
+        unsafe_allow_html=True,
+    )
+
+    sym_ids = _fetch_symbol_ids()
+    n_cols = min(4, len(action_items))
+    cols = st.columns(n_cols)
+    for i, (pos, status_cls) in enumerate(action_items):
+        with cols[i % n_cols]:
+            if st.button(
+                _t("w3_close_btn", symbol=pos["symbol"]),
+                key=f"w3_sim_{pos['symbol']}_{pos['side']}",
+                use_container_width=True,
+            ):
+                from edgework.exchange.order_builder import (
+                    plan_close_from_position,
+                    simulate,
+                )
+
+                reason = (
+                    "contrarian_to_smart_money"
+                    if status_cls in ("contrarian", "weak-contrarian")
+                    else "manual_close"
+                )
+                plan = plan_close_from_position(
+                    pos,
+                    symbol_id=sym_ids.get(pos["symbol"], 0),
+                    # Placeholder — the local companion injects the trader's
+                    # real numeric account id from their own .env.
+                    account_id=0,
+                    reason=reason,
+                )
+                action_type, params = plan.to_order_params()
+                sim = simulate(action_type, params)
+                st.session_state["w3_sim"] = {
+                    "symbol": pos["symbol"],
+                    "close_side": plan.close_side.name,
+                    "qty": plan.quantity,
+                    "reason": plan.reason_label,
+                    "body": sim.body,
+                    "digest": sim.digest,
+                    "signature": sim.typed_signature,
+                    "signer": sim.ephemeral_signer,
+                    "nonce": sim.nonce,
+                }
+
+    _sim = st.session_state.get("w3_sim")
+    if not _sim:
+        return
+
+    st.markdown(
+        '<div class="ew-sim">'
+        '<div class="ew-sim-head">'
+        f'<span class="tag">{_t("w3_sim_tag")}</span>'
+        f'<span class="meta">{_sim["reason"]}</span>'
+        '</div>'
+        '<div class="ew-sim-grid">'
+        f'<div><span class="k">{_t("up_h_symbol")}</span>'
+        f'<span class="v">{_sim["symbol"]}</span></div>'
+        f'<div><span class="k">{_t("w3_action")}</span>'
+        f'<span class="v">{_sim["close_side"]} {_sim["qty"]} · {_t("w3_reduce_only")}</span></div>'
+        f'<div><span class="k">Nonce</span><span class="v">{_sim["nonce"]}</span></div>'
+        f'<div><span class="k">{_t("w3_signer")}</span>'
+        f'<span class="v">{_sim["signer"][:10]}…{_sim["signer"][-6:]}</span></div>'
+        f'<div class="wide"><span class="k">{_t("w3_digest")}</span>'
+        f'<span class="v mono">{_sim["digest"]}</span></div>'
+        f'<div class="wide"><span class="k">{_t("w3_signature")}</span>'
+        f'<span class="v mono">{_sim["signature"]}</span></div>'
+        '</div>'
+        f'<div class="ew-sim-note">{_t("w3_note")}</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+    with st.expander(_t("w3_body_label"), expanded=False):
+        st.code(json.dumps(_sim["body"], indent=2), language="json")
+    if st.button(_t("w3_dismiss"), key="w3_dismiss_btn"):
+        st.session_state.pop("w3_sim", None)
+        st.rerun()
+
+
 def _render_user_positions_vs_smart_money(
     user_positions: list[dict],
     consensus: dict,
@@ -4742,10 +5772,12 @@ def _render_user_positions_vs_smart_money(
 
     rows_html = ""
     n_contrarian = 0
+    action_items: list[tuple[dict, str]] = []  # feeds the Wave 3 close buttons
     for pos in user_positions:
         symbol = pos["symbol"]
         sm = consensus.get(symbol)
         status_label, status_cls, narrative = _classify_user_vs_smart_money(pos, sm)
+        action_items.append((pos, status_cls))
         if status_cls in ("contrarian", "weak-contrarian"):
             n_contrarian += 1
 
@@ -4818,6 +5850,9 @@ def _render_user_positions_vs_smart_money(
     grid_html = f'<div class="ew-up-grid">{header_html}{rows_html}</div>'
     st.markdown(section_html + warning_html + grid_html, unsafe_allow_html=True)
 
+    # Wave 3 — insight→action: simulate a signed reduce-only close per position.
+    _render_w3_execution_layer(action_items)
+
 
 def _render_smart_money_watch(data: dict) -> None:
     """Live snapshot of top-trader positions, with consensus per symbol."""
@@ -4834,7 +5869,7 @@ def _render_smart_money_watch(data: dict) -> None:
         st.markdown(
             (
                 '<div class="ew-section">'
-                f'<div class="ew-section-title">{_t("sec_smart_money")}</div>'
+                f'<div class="ew-section-title ew-anchor" id="sec-smartmoney">{_t("sec_smart_money")}</div>'
                 f'<div class="ew-section-sub">{_t("sm_no_pos", n=len(traders))}</div>'
                 '</div>'
             ),
@@ -4925,7 +5960,7 @@ def _render_smart_money_watch(data: dict) -> None:
 
     section_html = (
         '<div class="ew-section">'
-        f'<div class="ew-section-title">{_t("sec_smart_money")}</div>'
+        f'<div class="ew-section-title ew-anchor" id="sec-smartmoney">{_t("sec_smart_money")}</div>'
         '<div class="ew-section-sub">'
         + _t("sm_subtitle", n_traders=n_traders, n_in_market=n_in_market, fetched=fetched_short)
         + '<br><br>'
@@ -4939,6 +5974,250 @@ def _render_smart_money_watch(data: dict) -> None:
     )
 
     st.markdown(section_html + watch_html, unsafe_allow_html=True)
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _fetch_smartmoney_intervals(addrs: tuple, days: int = 30) -> dict:
+    """Reconstruct when each qualified top trader held what.
+
+    Pulls every trader's position history for the window and converts each
+    closed position into an interval (open_ms, close_ms, side, notional,
+    addr). Looking up which intervals contain a timestamp = what the
+    smart-money book looked like at that moment.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    from edgework.sodex_client import SodexClient
+
+    if not addrs:
+        return {}
+
+    end_ms = int(pd.Timestamp.utcnow().value // 1_000_000)
+    start_ms = end_ms - days * 86_400_000
+
+    def _hist(addr: str):
+        try:
+            with SodexClient(user_address=addr) as c:
+                return addr, c.get_position_history_paginated(
+                    start_ms=start_ms, end_ms=end_ms,
+                    page_limit=500, max_pages=2,
+                )
+        except Exception:  # noqa: BLE001 — one bad wallet must not kill the card
+            return addr, None
+
+    intervals: dict[str, list] = {}
+    with ThreadPoolExecutor(max_workers=min(8, len(addrs))) as pool:
+        for addr, hist in pool.map(_hist, addrs):
+            for p in hist or []:
+                symbol = p.get("symbol")
+                if not symbol:
+                    continue
+                try:
+                    o_ms = int(p.get("createdAt") or 0)
+                    c_ms = int(p.get("updatedAt") or 0)
+                except (TypeError, ValueError):
+                    continue
+                if not o_ms or not c_ms or c_ms < o_ms:
+                    continue
+                side_raw = str(p.get("positionSide") or "").lower()
+                if "long" in side_raw:
+                    side = "long"
+                elif "short" in side_raw:
+                    side = "short"
+                else:
+                    continue  # direction undeterminable for closed one-way rows
+                try:
+                    entry = float(p.get("avgEntryPrice") or 0)
+                    qty = abs(float(p.get("cumClosedSize") or p.get("maxSize") or 0))
+                except (TypeError, ValueError):
+                    entry = qty = 0.0
+                notional = entry * qty
+                intervals.setdefault(symbol, []).append(
+                    (o_ms, c_ms, side, notional, addr.lower())
+                )
+    return intervals
+
+
+@st.cache_data(ttl=1800, show_spinner=False)
+def _compute_contrarian_track_record(
+    trades_df: pd.DataFrame,
+    addrs: tuple,
+    self_addr: str,
+    days: int = 30,
+) -> dict:
+    """Classify the user's recent entries against the reconstructed book.
+
+    Same bias thresholds as the live classifier: strong = count diff ≥3,
+    weak = 2× notional dominance with at least one trader on that side.
+    The user's own wallet is excluded from the book (a top-volume wallet
+    analysing itself must not count as its own smart money).
+    """
+    intervals = _fetch_smartmoney_intervals(addrs, days)
+
+    now_ms = int(pd.Timestamp.utcnow().value // 1_000_000)
+    start_ms = now_ms - days * 86_400_000
+    self_l = (self_addr or "").lower()
+
+    buckets: dict[str, list[float]] = {"contrarian": [], "aligned": [], "nosignal": []}
+    df = trades_df.dropna(subset=["opened_at", "pnl"])
+
+    for t in df.itertuples():
+        try:
+            t_ms = int(t.opened_at.timestamp() * 1000)
+        except (AttributeError, ValueError, OSError):
+            continue
+        if t_ms < start_ms:
+            continue
+        pnl = float(t.pnl)
+        iv = intervals.get(t.symbol)
+        if not iv:
+            buckets["nosignal"].append(pnl)
+            continue
+
+        lc = sc = 0
+        ln = sn = 0.0
+        for (o_ms, c_ms, side_i, notional_i, addr_i) in iv:
+            if addr_i == self_l:
+                continue
+            if o_ms <= t_ms <= c_ms:
+                if side_i == "long":
+                    lc += 1
+                    ln += notional_i
+                else:
+                    sc += 1
+                    sn += notional_i
+
+        if lc - sc >= 3 or (ln > sn * 2 and lc > 0):
+            bias = "long"
+        elif sc - lc >= 3 or (sn > ln * 2 and sc > 0):
+            bias = "short"
+        else:
+            buckets["nosignal"].append(pnl)
+            continue
+
+        user_side = str(t.side).lower()
+        if user_side == bias:
+            buckets["aligned"].append(pnl)
+        else:
+            buckets["contrarian"].append(pnl)
+
+    def _bstats(pnls: list[float]) -> dict:
+        if not pnls:
+            return {"n": 0, "wr": None, "exp": None, "total": 0.0}
+        a = np.array(pnls, dtype=float)
+        return {
+            "n": int(len(a)),
+            "wr": float((a > 0).mean()),
+            "exp": float(a.mean()),
+            "total": float(a.sum()),
+        }
+
+    return {
+        "contrarian": _bstats(buckets["contrarian"]),
+        "aligned":    _bstats(buckets["aligned"]),
+        "nosignal":   _bstats(buckets["nosignal"]),
+        "days":       days,
+        "n_traders":  len(addrs),
+    }
+
+
+def _render_contrarian_track_record(
+    trades_df: pd.DataFrame,
+    smart_money: dict,
+    self_addr: str,
+) -> None:
+    """Etapa D — the evidence card behind the divergence alert."""
+    traders = smart_money.get("traders") or []
+    addrs = tuple(t["addr"] for t in traders if t.get("addr"))
+    if not addrs or trades_df is None or trades_df.empty:
+        return
+
+    with st.spinner(_t("tr_loading")):
+        try:
+            data = _compute_contrarian_track_record(
+                trades_df, addrs, self_addr or ""
+            )
+        except Exception:  # noqa: BLE001 — evidence card is optional, never fatal
+            return
+
+    days = data["days"]
+    c, a, ns = data["contrarian"], data["aligned"], data["nosignal"]
+
+    section_html = (
+        '<div class="ew-section">'
+        f'<div class="ew-section-title">{_t("tr_title")}</div>'
+        f'<div class="ew-section-sub">{_t("tr_sub", days=days)}</div>'
+        '</div>'
+    )
+
+    if c["n"] == 0 and a["n"] == 0:
+        st.markdown(
+            section_html
+            + f'<div class="ew-track-caveat">{_t("tr_empty", days=days)}</div>',
+            unsafe_allow_html=True,
+        )
+        return
+
+    def _money2(x: float) -> str:
+        """Signed money with cents — per-trade expectancies here are often
+        single-digit dollars, where integer rounding hides the real gap."""
+        sign = "−" if x < 0 else "+"
+        return f"{sign}${abs(x):,.2f}"
+
+    def _cell(kind: str, label: str, s: dict) -> str:
+        if s["n"] == 0:
+            body = '<span class="big">0</span><div class="sub">—</div>'
+        else:
+            wr_cls = "pos" if s["wr"] >= 0.5 else "neg"
+            exp_cls = "pos" if s["exp"] >= 0 else "neg"
+            tot_cls = "pos" if s["total"] >= 0 else "neg"
+            body = (
+                f'<span class="big">{s["n"]:,}</span>'
+                '<div class="sub">'
+                f'<span class="{wr_cls}">{s["wr"]:.0%}</span> {_t("tr_win")}'
+                f' · <span class="{exp_cls}">{_money2(s["exp"])}</span>{_t("tr_exp")}'
+                f'<br>{_t("tr_total")}: <span class="{tot_cls}">{_money_signed(s["total"])}</span>'
+                '</div>'
+            )
+        return (
+            f'<div class="ew-track-cell {kind}">'
+            f'<span class="k">{label}</span>{body}</div>'
+        )
+
+    cells = (
+        _cell("contrarian", _t("tr_contrarian"), c)
+        + _cell("aligned", _t("tr_aligned"), a)
+        + _cell("nosignal", _t("tr_nosignal"), ns)
+    )
+
+    verdict_html = ""
+    if c["n"] >= 3 and a["n"] >= 3:
+        gap = a["exp"] - c["exp"]
+        key = "tr_verdict_bad" if gap > 0 else "tr_verdict_good"
+        verdict_html = (
+            '<div class="ew-track-verdict">'
+            + _t(
+                key,
+                contr_exp=_money2(c["exp"]),
+                alig_exp=_money2(a["exp"]),
+                gap=_money2(abs(gap)),
+                n=c["n"],
+            )
+            + '</div>'
+        )
+
+    caveat_html = (
+        f'<div class="ew-track-caveat">{_t("tr_caveat", n_traders=data["n_traders"])}</div>'
+    )
+
+    st.markdown(
+        section_html
+        + f'<div class="ew-track"><div class="ew-track-grid">{cells}</div>'
+        + verdict_html
+        + caveat_html
+        + '</div>',
+        unsafe_allow_html=True,
+    )
 
 
 def _render_cohort_benchmark(you_overall, you_slices, you_trades) -> None:
@@ -5195,7 +6474,7 @@ def _render_cohort_benchmark(you_overall, you_slices, you_trades) -> None:
     html = f"""
     <div class="ew-bench">
         <div class="ew-bench-header">
-            <div class="ew-bench-title">{_t("pb_eyebrow")}</div>
+            <div class="ew-bench-title ew-anchor" id="sec-peers">{_t("pb_eyebrow")}</div>
             <div class="ew-bench-id">{_t("pb_vs", n_traders=len(cohort), n_trades=total_trades)}</div>
         </div>
         <div class="ew-bench-grid">
@@ -5435,9 +6714,15 @@ def _render_risk_filters(trades_df: pd.DataFrame) -> None:
 # Autopsy narrative — Verdict, Confrontation, Waterfall
 # --------------------------------------------------------------------------- #
 
-_render_verdict(slices, overall)
+_render_verdict(slices, overall, trades)
 _render_confrontation(slices)
-_render_waterfall(slices, overall)
+
+# Secondary depth: collapsed by default so first-time visitors aren't hit
+# with every chart at once. The anchor div sits outside the expander so the
+# top-nav jump still lands here when collapsed.
+st.markdown('<div id="sec-waterfall" class="ew-anchor"></div>', unsafe_allow_html=True)
+with st.expander(_t("exp_waterfall"), expanded=False):
+    _render_waterfall(slices, overall)
 
 
 # --------------------------------------------------------------------------- #
@@ -5447,7 +6732,7 @@ _render_waterfall(slices, overall)
 st.markdown(
     f"""
     <div class="ew-section">
-        <div class="ew-section-title">{_t("sec_conditional")}</div>
+        <div class="ew-section-title ew-anchor" id="sec-conditional">{_t("sec_conditional")}</div>
         <div class="ew-section-sub">{_t("sec_conditional_sub")}</div>
     </div>
     """,
@@ -5595,7 +6880,9 @@ _render_cohort_benchmark(overall, slices, trades)
 # Risk Filters (Wave 2 · Sprint 2) — 2D anti-pattern detector
 # --------------------------------------------------------------------------- #
 
-_render_risk_filters(trades)
+st.markdown('<div id="sec-risk" class="ew-anchor"></div>', unsafe_allow_html=True)
+with st.expander(_t("exp_risk"), expanded=False):
+    _render_risk_filters(trades)
 
 
 # --------------------------------------------------------------------------- #
@@ -5623,6 +6910,11 @@ if _active_addr_for_open:
 
 _render_smart_money_watch(_smart_money)
 
+# Etapa D — historical evidence: how the trader's past entries fared against
+# the reconstructed smart-money book. Only meaningful with a real wallet.
+if _active_addr_for_open:
+    _render_contrarian_track_record(trades, _smart_money, _active_addr_for_open)
+
 
 # --------------------------------------------------------------------------- #
 # Full Diagnostic — single AI-powered consolidated analysis. Replaces the old
@@ -5632,7 +6924,7 @@ _render_smart_money_watch(_smart_money)
 st.markdown(
     f"""
     <div class="ew-section">
-        <div class="ew-section-title">{_t("sec_diagnostic")}</div>
+        <div class="ew-section-title ew-anchor" id="sec-diagnostic">{_t("sec_diagnostic")}</div>
         <div class="ew-section-sub">{_t("sec_diagnostic_sub")}</div>
     </div>
     """,

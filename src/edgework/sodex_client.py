@@ -89,12 +89,41 @@ class SodexClient:
     # Internal HTTP
     # ------------------------------------------------------------------ #
 
+    # Status codes worth retrying: rate limit + transient server errors.
+    _RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
+    _RETRY_ATTEMPTS = 3
+    _RETRY_BACKOFF_S = (0.5, 1.5)  # sleep before 2nd and 3rd attempt
+
     def _get(self, path: str, params: dict[str, Any] | None = None) -> Any:
-        """Issue a GET to {base_url}{path}. No auth headers."""
+        """Issue a GET to {base_url}{path}. No auth headers.
+
+        Retries transient failures (429 / 5xx / transport errors) up to
+        3 attempts with backoff. Without this, one rate-limited call in a
+        fan-out (e.g. smart-money consensus across 20 wallets) silently
+        drops a trader and skews the aggregate.
+        """
+        import time as _time
+
         url = f"{self.base_url}{path}"
-        r = self._client.get(url, params=params, headers={"Accept": "application/json"})
-        r.raise_for_status()
-        return r.json()
+        last_exc: Exception | None = None
+        for attempt in range(self._RETRY_ATTEMPTS):
+            if attempt > 0:
+                _time.sleep(self._RETRY_BACKOFF_S[attempt - 1])
+            try:
+                r = self._client.get(
+                    url, params=params, headers={"Accept": "application/json"}
+                )
+                if r.status_code in self._RETRY_STATUSES:
+                    last_exc = httpx.HTTPStatusError(
+                        f"HTTP {r.status_code}", request=r.request, response=r
+                    )
+                    continue
+                r.raise_for_status()
+                return r.json()
+            except httpx.TransportError as e:  # timeouts, resets, DNS blips
+                last_exc = e
+                continue
+        raise last_exc if last_exc else RuntimeError(f"GET {path} failed")
 
     @staticmethod
     def _unwrap(payload: Any) -> Any:

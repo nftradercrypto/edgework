@@ -126,9 +126,15 @@ def test_slice_all_returns_all_dimensions():
         "consecutive_losses",
         "size_quartile",
         "hold_duration",
+        "regime",
     }
     assert set(out.keys()) == expected
     for name, slice_df in out.items():
+        if name == "regime":
+            # Regime requires a `regime` column attached upstream
+            # (streamlit_app._attach_regime); synthetic trades lack it,
+            # so the slice is legitimately empty here.
+            continue
         assert not slice_df.empty, f"{name} should not be empty"
         assert "expectancy" in slice_df.columns
         assert "n_trades" in slice_df.columns
