@@ -31,12 +31,14 @@ leaderboard → Wave 3 **acts** on it (alerts + execution).
 The Wave 2 judges asked for "tighter execution integration and risk hooks."
 Wave 3 closes that loop, while keeping custody strictly local.
 
-### 1 · Smart Money Divergence Alerts (Discord)
+### 1 · Smart Money Divergence Alerts + risk-control hooks (Discord)
 A local, read-only watcher (`scripts/alert_bot.py`) pings your Discord the
-moment you open a position **against the qualified smart-money book**. Same
-strong/weak bias thresholds as the live watch, deduped so the same position
-never double-pings. Set it up from the in-app wizard (paste webhook → test →
-copy the run command). No private key, never trades.
+moment you open a position **against the qualified smart-money book** (same
+strong/weak bias thresholds as the live watch) **or** one that matches one of
+your own historically losing **2D risk patterns** (e.g. `SYMBOL LIT-USD +
+SIZE Q4`). Deduped so the same position never double-pings. Set it up from the
+in-app wizard (paste webhook → test → copy the run command). No private key,
+never trades.
 
 ### 2 · EIP-712 execution layer (insight → action)
 Reduce-only close orders signed with SoDEX's EIP-712 scheme. The **hosted app
@@ -154,7 +156,8 @@ edgework/
 │   ├── slicer.py            # Conditional Performance Mapping core
 │   ├── qna.py               # Wave 2: Full diagnostic engine (Claude tool use)
 │   ├── smart_money.py       # Wave 3: pure consensus + open-positions fetch
-│   ├── alerts.py            # Wave 3: divergence detection + Discord + dedupe
+│   ├── alerts.py            # Wave 3: divergence + risk alerts, Discord, dedupe
+│   ├── risk.py              # Wave 3: 2D anti-pattern engine + position matcher
 │   ├── exchange/            # Wave 3: EIP-712 signing + order builder + client
 │   │   ├── signing.py       #   EIP-712 pipeline (ported, vector-pinned)
 │   │   ├── order_builder.py #   reduce-only close orders + simulate()
@@ -165,7 +168,7 @@ edgework/
 ├── scripts/
 │   ├── alert_bot.py         # Wave 3: local Discord divergence-alert poller
 │   └── edgework_exec.py     # Wave 3: local reduce-only execution companion
-├── tests/                   # slicer, exchange, qna filters, alerts (33 passing)
+├── tests/                   # slicer, exchange, qna, alerts, risk (39 passing)
 ├── data/                    # Local parquet/CSV cache (gitignored)
 ├── docs/                    # Architecture notes, API usage plan
 ├── streamlit_app.py         # Live app entry point
