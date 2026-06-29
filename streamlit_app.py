@@ -2262,6 +2262,32 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
                       "PT": "Body POST exato — o que o /exchange da SoDEX receberia"},
     "w3_dismiss":    {"EN": "✕ Dismiss simulation", "PT": "✕ Fechar simulação"},
 
+    # Discord divergence alerts wizard (Wave 3)
+    "al_title":   {"EN": "Smart Money Divergence Alerts · Discord",
+                   "PT": "Alertas de Divergência Smart Money · Discord"},
+    "al_sub":     {
+        "EN": "Get pinged the moment you open a position against the qualified smart-money book. Paste a Discord webhook to test it here; run the local bot to receive alerts continuously — read-only, no private key.",
+        "PT": "Receba um ping no momento em que você abre uma posição contra o book dos top traders. Cole um webhook do Discord pra testar aqui; rode o bot local pra receber alertas continuamente — somente leitura, sem chave privada.",
+    },
+    "al_webhook_label": {"EN": "Discord webhook URL", "PT": "URL do webhook do Discord"},
+    "al_test_btn":   {"EN": "Send test message", "PT": "Enviar mensagem de teste"},
+    "al_test_ok":    {"EN": "✓ Test sent — check your Discord channel.",
+                      "PT": "✓ Teste enviado — confira seu canal no Discord."},
+    "al_test_fail":  {"EN": "Discord rejected the webhook (HTTP {code}). Double-check the URL.",
+                      "PT": "O Discord rejeitou o webhook (HTTP {code}). Confira a URL."},
+    "al_test_err":   {"EN": "Could not reach Discord: {err}", "PT": "Não consegui acessar o Discord: {err}"},
+    "al_need_url":   {"EN": "Paste a webhook URL first.", "PT": "Cole uma URL de webhook primeiro."},
+    "al_help":       {
+        "EN": "Create one in Discord: Server Settings → Integrations → Webhooks → New Webhook → Copy URL.",
+        "PT": "Crie um no Discord: Configurações do Servidor → Integrações → Webhooks → Novo Webhook → Copiar URL.",
+    },
+    "al_run_label":  {"EN": "Then run the watcher on your machine:",
+                      "PT": "Depois rode o monitor na sua máquina:"},
+    "al_run_note":   {
+        "EN": "It polls your open positions every few minutes and posts a Discord alert on each new divergence — deduped so the same position never double-pings.",
+        "PT": "Ele verifica suas posições abertas a cada poucos minutos e posta um alerta no Discord a cada nova divergência — com dedupe pra mesma posição nunca avisar duas vezes.",
+    },
+
     # Tilt watch banner
     "tilt_tag":   {"EN": "TILT CHECK", "PT": "CHECAGEM DE TILT"},
     "tilt_body":  {
@@ -6914,6 +6940,61 @@ _render_smart_money_watch(_smart_money)
 # the reconstructed smart-money book. Only meaningful with a real wallet.
 if _active_addr_for_open:
     _render_contrarian_track_record(trades, _smart_money, _active_addr_for_open)
+
+
+def _render_alert_wizard(address: str) -> None:
+    """Discord divergence-alert setup: test a webhook + the command to run
+    the local watcher. The webhook URL stays in session_state only — never
+    persisted server-side. Real continuous alerting runs locally via
+    scripts/alert_bot.py."""
+    st.markdown(
+        '<div class="ew-section">'
+        f'<div class="ew-section-title">{_t("al_title")}</div>'
+        f'<div class="ew-section-sub">{_t("al_sub")}</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    webhook = st.text_input(
+        _t("al_webhook_label"),
+        value=st.session_state.get("al_webhook", ""),
+        placeholder="https://discord.com/api/webhooks/…",
+        type="password",
+        key="al_webhook",
+        help=_t("al_help"),
+    )
+
+    if st.button(_t("al_test_btn"), key="al_test_btn"):
+        url = (webhook or "").strip()
+        if not url:
+            st.warning(_t("al_need_url"))
+        else:
+            try:
+                from edgework.alerts import send_test
+
+                code = send_test(url)
+                if code in (200, 204):
+                    st.success(_t("al_test_ok"))
+                else:
+                    st.error(_t("al_test_fail", code=code))
+            except Exception as e:  # noqa: BLE001
+                st.error(_t("al_test_err", err=str(e)[:120]))
+
+    st.caption(_t("al_run_label"))
+    _addr = address or "0xYOUR_WALLET"
+    st.code(
+        "export SODEX_USER_ADDRESS=" + _addr + "\n"
+        'export EDGEWORK_DISCORD_WEBHOOK="<your-webhook-url>"\n'
+        "python scripts/alert_bot.py            # loop, alert on new divergences\n"
+        "python scripts/alert_bot.py --once     # single check\n"
+        "python scripts/alert_bot.py --test     # webhook connectivity",
+        language="bash",
+    )
+    st.caption(_t("al_run_note"))
+
+
+if _active_addr_for_open:
+    _render_alert_wizard(_active_addr_for_open)
 
 
 # --------------------------------------------------------------------------- #
