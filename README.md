@@ -2,9 +2,11 @@
 
 **Trade analytics for pro traders.**
 
-> 🏆 **Wave 1 winner (1st place).** Wave 1 submission preserved at tag
+> 🏆 **Wave 1 & Wave 2 winner (1st place, both).** Earlier submissions are
+> preserved at tags
 > [`wave-1-final`](https://github.com/nftradercrypto/edgework/releases/tag/wave-1-final)
-> and branch `wave-1`. The current `main` is the **Wave 2 submission**.
+> and [`wave-2-final`](https://github.com/nftradercrypto/edgework/releases/tag/wave-2-final).
+> The current `main` is **Wave 3 (final)**.
 
 Edgework is a performance intelligence tool for serious traders on SoDEX.
 It turns your raw order history into the one thing PNL doesn't show:
@@ -13,11 +15,47 @@ actually make money, and the slices where you give it back.
 
 > Most traders discover that 60–80% of their losses come from
 > 10–20% of their setups. Edgework finds those setups, benchmarks
-> them against the SoDEX leaderboard, and warns you when you're
-> about to trade against the smart-money book.
+> them against the SoDEX leaderboard, warns you when you're about to
+> trade against the smart-money book, and lets you act on it.
 
 Live app: **[edgework.streamlit.app](https://edgework.streamlit.app)**
 Submission: [SoSoValue Buildathon](https://app.akindo.io/wave-hacks/JBEQXgN4Zi2jA3wA)
+
+The four-wave arc: Wave 1 **measured** edge → Wave 2 **compared** it to the
+leaderboard → Wave 3 **acts** on it (alerts + execution).
+
+---
+
+## What's in Wave 3 — from analytics to action
+
+The Wave 2 judges asked for "tighter execution integration and risk hooks."
+Wave 3 closes that loop, while keeping custody strictly local.
+
+### 1 · Smart Money Divergence Alerts (Discord)
+A local, read-only watcher (`scripts/alert_bot.py`) pings your Discord the
+moment you open a position **against the qualified smart-money book**. Same
+strong/weak bias thresholds as the live watch, deduped so the same position
+never double-pings. Set it up from the in-app wizard (paste webhook → test →
+copy the run command). No private key, never trades.
+
+### 2 · EIP-712 execution layer (insight → action)
+Reduce-only close orders signed with SoDEX's EIP-712 scheme. The **hosted app
+simulates only** — it builds and signs each order with an ephemeral key and
+shows you the exact digest, signature, and POST body, sending nothing. Real
+execution runs locally via `scripts/edgework_exec.py` with a **revocable SoDEX
+API key from your own `.env`** — same trust model as using the SoDEX frontend
+yourself. Every order is reduce-only by construction: it can only shrink risk.
+
+### 3 · Contrarian track record (the evidence)
+Reconstructs the smart-money book at each of your past entries and shows how
+your aligned vs contrarian trades actually performed — the data that justifies
+turning the alert on.
+
+Plus a statistical-rigor pass (bootstrap-based verdict confidence, retries,
+parallel fetches, low-sample badges, fees decomposition, tilt detector) and a
+first-contact UX overhaul (TL;DR card, anchor nav, one-click demo, tooltips).
+
+See [CHANGELOG.md](CHANGELOG.md) for the full list.
 
 ---
 
@@ -114,11 +152,20 @@ edgework/
 │   ├── sodex_client.py      # SoDEX API client (read-only, account + leaderboard)
 │   ├── sosovalue_client.py  # SoSoValue API client (news, indexes, ETF flows)
 │   ├── slicer.py            # Conditional Performance Mapping core
-│   ├── benchmark.py         # Leaderboard benchmarking
-│   ├── briefing.py          # Legacy briefing (kept for back-compat)
 │   ├── qna.py               # Wave 2: Full diagnostic engine (Claude tool use)
+│   ├── smart_money.py       # Wave 3: pure consensus + open-positions fetch
+│   ├── alerts.py            # Wave 3: divergence detection + Discord + dedupe
+│   ├── exchange/            # Wave 3: EIP-712 signing + order builder + client
+│   │   ├── signing.py       #   EIP-712 pipeline (ported, vector-pinned)
+│   │   ├── order_builder.py #   reduce-only close orders + simulate()
+│   │   ├── execution_client.py  # LOCAL-ONLY live submission
+│   │   └── constants.py     #   networks, enums, signing field order
+│   ├── briefing.py          # Legacy briefing (kept for back-compat)
 │   └── config.py            # Settings, API keys via env vars
-├── tests/                   # Unit tests for slicer + benchmark
+├── scripts/
+│   ├── alert_bot.py         # Wave 3: local Discord divergence-alert poller
+│   └── edgework_exec.py     # Wave 3: local reduce-only execution companion
+├── tests/                   # slicer, exchange, qna filters, alerts (33 passing)
 ├── data/                    # Local parquet/CSV cache (gitignored)
 ├── docs/                    # Architecture notes, API usage plan
 ├── streamlit_app.py         # Live app entry point
