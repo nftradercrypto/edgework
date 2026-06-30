@@ -666,6 +666,63 @@ st.markdown(
     }}
     .ew-sim-note strong {{ color: {TEXT}; }}
 
+    /* ── Trade Check (in-browser pre-trade verdict) ── */
+    .ew-tc {{
+        border: 1px solid {BORDER_HI};
+        border-left: 3px solid {MUTED};
+        background: {SURFACE};
+        margin-top: 4px;
+    }}
+    .ew-tc.bad     {{ border-left-color: {RED};   background: rgba(255,59,48,0.04); }}
+    .ew-tc.warn    {{ border-left-color: {ACCENT}; background: rgba(245,132,31,0.04); }}
+    .ew-tc.neutral {{ border-left-color: {MUTED}; }}
+    .ew-tc.ok      {{ border-left-color: {GREEN}; background: rgba(76,175,80,0.03); }}
+    .ew-tc.good    {{ border-left-color: {GREEN}; background: rgba(76,175,80,0.05); }}
+    .ew-tc .tc-verdict {{
+        font-family: 'Outfit', sans-serif;
+        font-size: 17px;
+        font-weight: 600;
+        color: {TEXT};
+        padding: 15px 20px 13px;
+        border-bottom: 1px solid {BORDER};
+    }}
+    .ew-tc.bad  .tc-verdict {{ color: {RED}; }}
+    .ew-tc.good .tc-verdict {{ color: {GREEN}; }}
+    .ew-tc .tc-rows {{ padding: 6px 0; }}
+    .ew-tc .tc-row {{
+        display: grid;
+        grid-template-columns: 28px 200px 1fr;
+        align-items: baseline;
+        padding: 7px 20px;
+        font-family: 'Outfit', sans-serif;
+        font-size: 13.5px;
+    }}
+    .ew-tc .tc-row .i {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        color: {ACCENT};
+        font-weight: 700;
+    }}
+    .ew-tc .tc-row .k {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: {DIM};
+    }}
+    .ew-tc .tc-row .v {{ color: {TEXT}; }}
+    .ew-tc .tc-row .v .pos {{ color: {GREEN}; font-weight: 700; }}
+    .ew-tc .tc-row .v .neg {{ color: {RED};   font-weight: 700; }}
+    .ew-tc .tc-row .v .lown {{ color: {ACCENT}; font-size: 11px; }}
+    .ew-tc .tc-foot {{
+        padding: 10px 20px 12px;
+        border-top: 1px solid {BORDER};
+        font-family: 'Space Mono', monospace;
+        font-size: 9.5px;
+        color: {DIM};
+        letter-spacing: 0.04em;
+    }}
+
     /* ── TL;DR card (10-second summary) ── */
     .ew-tldr {{
         display: grid;
@@ -2149,6 +2206,7 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "tldr_net":      {"EN": "Net PNL",       "PT": "PNL líquido"},
 
     # Anchor nav
+    "nav_tradecheck":  {"EN": "Trade Check",  "PT": "Trade Check"},
     "nav_verdict":     {"EN": "Verdict",      "PT": "Veredito"},
     "nav_confront":    {"EN": "Belief check", "PT": "Crença×Dados"},
     "nav_waterfall":   {"EN": "Waterfall",    "PT": "Waterfall"},
@@ -2157,6 +2215,46 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "nav_risk":        {"EN": "Risk filters", "PT": "Filtros de risco"},
     "nav_smartmoney":  {"EN": "Smart money",  "PT": "Smart money"},
     "nav_diagnostic":  {"EN": "AI diagnostic","PT": "Diagnóstico IA"},
+
+    # Trade Check (Wave 3 — in-browser pre-trade verdict)
+    "tc_title":   {"EN": "Trade Check · before you take it",
+                   "PT": "Trade Check · antes de entrar"},
+    "tc_sub":     {
+        "EN": "Thinking about a trade? Check it against your own history and the live smart-money book — instantly, in your browser. No wallet to connect, nothing to install.",
+        "PT": "Pensando em uma trade? Cheque contra o seu próprio histórico e o book do smart money ao vivo — na hora, no navegador. Sem conectar carteira, sem instalar nada.",
+    },
+    "tc_symbol":  {"EN": "Symbol", "PT": "Símbolo"},
+    "tc_side":    {"EN": "Side",   "PT": "Lado"},
+    "tc_your_history": {"EN": "Your history on this setup", "PT": "Seu histórico nesse setup"},
+    "tc_smart_money":  {"EN": "Smart money right now",      "PT": "Smart money agora"},
+    "tc_regime":       {"EN": "Current regime fit",         "PT": "Ajuste ao regime atual"},
+    "tc_win":     {"EN": "win",    "PT": "acerto"},
+    "tc_trades":  {"EN": "trades", "PT": "trades"},
+    "tc_long":    {"EN": "long",   "PT": "long"},
+    "tc_short":   {"EN": "short",  "PT": "short"},
+    "tc_aligned":    {"EN": "aligned with you",  "PT": "alinhado com você"},
+    "tc_contrarian": {"EN": "you'd be contrarian", "PT": "você estaria contra"},
+    "tc_no_history": {"EN": "no closed trades on this symbol+side yet",
+                     "PT": "nenhum trade fechado nesse símbolo+lado ainda"},
+    "tc_sm_nosignal":{"EN": "no clear smart-money bias on this symbol",
+                     "PT": "sem viés claro do smart money nesse símbolo"},
+    "tc_regime_your":      {"EN": "your {regime} {side} edge", "PT": "seu edge {side} em {regime}"},
+    "tc_regime_nodata":    {"EN": "not enough {regime} trades on this setup to read",
+                            "PT": "poucos trades em {regime} nesse setup pra ler"},
+    "tc_regime_unavailable": {"EN": "regime data unavailable right now",
+                              "PT": "dados de regime indisponíveis agora"},
+    "tc_v_strong_avoid": {"EN": "🛑 This {side} fights your history AND the smart-money book — strong skip.",
+                          "PT": "🛑 Esse {side} briga com seu histórico E com o smart money — pule essa."},
+    "tc_v_caution":      {"EN": "⚠ This {side} leans against you — cut size or wait for a better window.",
+                          "PT": "⚠ Esse {side} pesa contra você — corte o tamanho ou espere uma janela melhor."},
+    "tc_v_mixed":        {"EN": "~ Mixed signal on this {side} — no strong edge either way.",
+                          "PT": "~ Sinal misto nesse {side} — sem edge forte pra nenhum lado."},
+    "tc_v_favorable":    {"EN": "✓ This {side} is in your favor — the data backs it.",
+                          "PT": "✓ Esse {side} está a seu favor — os dados apoiam."},
+    "tc_v_strong_go":    {"EN": "✅ This {side} aligns with your edge AND the smart-money book — green light.",
+                          "PT": "✅ Esse {side} bate com seu edge E com o smart money — sinal verde."},
+    "tc_foot":    {"EN": "Read-only decision support — Edgework never places the order; it tells you whether to.",
+                   "PT": "Suporte à decisão, somente leitura — o Edgework nunca envia a ordem; ele te diz se vale."},
 
     # One-click demo
     "demo_btn":      {"EN": "🎲 No wallet? Try a top trader's →",
@@ -3620,14 +3718,15 @@ def _render_tldr(trades_df: pd.DataFrame, slices_dict: dict, ov) -> None:
 def _render_anchor_nav() -> None:
     """Numbered jump-links that give the long page a navigable spine."""
     items = [
-        ("sec-verdict",     "01", _t("nav_verdict")),
-        ("sec-confront",    "02", _t("nav_confront")),
-        ("sec-waterfall",   "03", _t("nav_waterfall")),
-        ("sec-conditional", "04", _t("nav_conditional")),
-        ("sec-peers",       "05", _t("nav_peers")),
-        ("sec-risk",        "06", _t("nav_risk")),
-        ("sec-smartmoney",  "07", _t("nav_smartmoney")),
-        ("sec-diagnostic",  "08", _t("nav_diagnostic")),
+        ("sec-tradecheck",  "01", _t("nav_tradecheck")),
+        ("sec-verdict",     "02", _t("nav_verdict")),
+        ("sec-confront",    "03", _t("nav_confront")),
+        ("sec-waterfall",   "04", _t("nav_waterfall")),
+        ("sec-conditional", "05", _t("nav_conditional")),
+        ("sec-peers",       "06", _t("nav_peers")),
+        ("sec-risk",        "07", _t("nav_risk")),
+        ("sec-smartmoney",  "08", _t("nav_smartmoney")),
+        ("sec-diagnostic",  "09", _t("nav_diagnostic")),
     ]
     links = "".join(
         f'<a href="#{anchor}"><span class="n">{num}</span>{label}</a>'
@@ -3636,8 +3735,203 @@ def _render_anchor_nav() -> None:
     st.markdown(f'<div class="ew-nav">{links}</div>', unsafe_allow_html=True)
 
 
+@st.cache_data(ttl=900, show_spinner=False)
+def _consensus_cached() -> dict:
+    """Smart-money consensus via the pure module. Shared by Trade Check (top)
+    and the Smart Money Watch (bottom) so the leaderboard + position fetches
+    happen once per 15 min."""
+    from edgework.smart_money import fetch_consensus
+    try:
+        return fetch_consensus(n_top=20, window="30d")
+    except Exception as e:  # noqa: BLE001
+        return {"error": str(e), "traders": [], "consensus_per_symbol": {}}
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def _current_btc_regime() -> str | None:
+    """Today's BTC regime (uptrend / chop / downtrend), or None if unavailable."""
+    end_ms = int(pd.Timestamp.now("UTC").value // 1_000_000)
+    start_ms = end_ms - 45 * 86_400_000
+    regime_map = _fetch_btc_regime_map(start_ms, end_ms)
+    if not regime_map:
+        return None
+    return regime_map[max(regime_map)]
+
+
+def _sm_bias_for(cs: dict | None) -> tuple[str | None, str]:
+    """(bias_side, strength) for a symbol's consensus — same thresholds as the
+    live watch and the divergence engine."""
+    if not cs:
+        return None, ""
+    lc, sc = int(cs.get("long_count", 0)), int(cs.get("short_count", 0))
+    ln, sn = float(cs.get("long_notional", 0)), float(cs.get("short_notional", 0))
+    if lc - sc >= 3:
+        return "long", "strong"
+    if sc - lc >= 3:
+        return "short", "strong"
+    if ln > sn * 2 and lc > 0:
+        return "long", "weak"
+    if sn > ln * 2 and sc > 0:
+        return "short", "weak"
+    return None, ""
+
+
+def _render_trade_check(raw_trades_df: pd.DataFrame, smart_money: dict,
+                        current_regime: str | None) -> None:
+    """Pre-trade verdict: check a hypothetical trade against your own history
+    AND the live smart-money book, before you take it. 100% in-browser."""
+    if raw_trades_df is None or raw_trades_df.empty or "symbol" not in raw_trades_df.columns:
+        return
+    symbols = raw_trades_df["symbol"].value_counts().index.tolist()
+    if not symbols:
+        return
+
+    # Local formatter — _money_signed is defined further down the script and
+    # Streamlit executes top-down, so referencing it here would NameError.
+    def _money_signed(x):
+        if x is None or pd.isna(x):
+            return "—"
+        sign = "−" if x < 0 else ("+" if x > 0 else "")
+        return f"{sign}${abs(x):,.2f}"
+
+    st.markdown(
+        '<div class="ew-section">'
+        f'<div class="ew-section-title ew-anchor" id="sec-tradecheck">{_t("tc_title")}</div>'
+        f'<div class="ew-section-sub">{_t("tc_sub")}</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    c1, c2 = st.columns([2, 2])
+    with c1:
+        symbol = st.selectbox(_t("tc_symbol"), symbols, key="tc_symbol",
+                              label_visibility="collapsed")
+    with c2:
+        side = st.segmented_control(
+            _t("tc_side"), options=["long", "short"], default="long",
+            key="tc_side", label_visibility="collapsed",
+        ) or "long"
+
+    # 1 — your history on this exact setup
+    sub = raw_trades_df[
+        (raw_trades_df["symbol"] == symbol)
+        & (raw_trades_df["side"].astype(str).str.lower() == side)
+    ]
+    n = len(sub)
+    hist_exp = hist_wr = hist_total = None
+    hist_score = 0
+    if n >= 1:
+        pnl = sub["pnl"].dropna()
+        if len(pnl):
+            wins, losses = pnl[pnl > 0], pnl[pnl <= 0]
+            hist_wr = len(wins) / len(pnl)
+            aw = float(wins.mean()) if len(wins) else 0.0
+            al = abs(float(losses.mean())) if len(losses) else 0.0
+            hist_exp = aw * hist_wr - al * (1 - hist_wr)
+            hist_total = float(pnl.sum())
+            if n >= 5:
+                hist_score = 1 if hist_exp > 0 else (-1 if hist_exp < 0 else 0)
+
+    # 2 — smart-money book right now
+    consensus = (smart_money or {}).get("consensus_per_symbol", {}) or {}
+    cs = consensus.get(symbol)
+    bias, strength = _sm_bias_for(cs)
+    sm_score = 0
+    if bias is not None:
+        sm_score = 1 if bias == side else -1
+
+    # 3 — your edge in the current regime, same symbol+side
+    reg_exp = None
+    if current_regime and "regime" in sub.columns and not sub.empty:
+        reg_sub = sub[sub["regime"].astype(str) == current_regime]
+        if len(reg_sub) >= 3:
+            rp = reg_sub["pnl"].dropna()
+            if len(rp):
+                rwins, rlosses = rp[rp > 0], rp[rp <= 0]
+                rwr = len(rwins) / len(rp)
+                raw_ = float(rwins.mean()) if len(rwins) else 0.0
+                ral = abs(float(rlosses.mean())) if len(rlosses) else 0.0
+                reg_exp = raw_ * rwr - ral * (1 - rwr)
+
+    # Verdict
+    score = hist_score + sm_score
+    if score <= -2:
+        v_cls, v_key = "bad", "tc_v_strong_avoid"
+    elif score == -1:
+        v_cls, v_key = "warn", "tc_v_caution"
+    elif score >= 2:
+        v_cls, v_key = "good", "tc_v_strong_go"
+    elif score == 1:
+        v_cls, v_key = "ok", "tc_v_favorable"
+    else:
+        v_cls, v_key = "neutral", "tc_v_mixed"
+    verdict_txt = _t(v_key, symbol=symbol, side=side.upper())
+
+    # ── signal rows ──
+    def _exp_cls(x):
+        return "pos" if (x is not None and x >= 0) else "neg"
+
+    if hist_exp is None:
+        hist_val = _t("tc_no_history")
+    else:
+        low = ' <span class="lown">⚠ n&lt;5</span>' if n < 5 else ""
+        hist_val = (
+            f'<span class="{_exp_cls(hist_exp)}">{_money_signed(hist_exp)}</span>/trade'
+            f' · {hist_wr:.0%} {_t("tc_win")} · {n} {_t("tc_trades")}{low}'
+        )
+
+    if bias is None:
+        sm_val = _t("tc_sm_nosignal")
+        sm_row_cls = "neutral"
+    else:
+        lc, sc = int(cs.get("long_count", 0)), int(cs.get("short_count", 0))
+        align = _t("tc_aligned") if bias == side else _t("tc_contrarian")
+        sm_row_cls = "pos" if bias == side else "neg"
+        sm_val = (
+            f'{lc} {_t("tc_long")} · {sc} {_t("tc_short")} → '
+            f'<span class="{sm_row_cls}">{align}</span>'
+        )
+
+    if current_regime:
+        if reg_exp is None:
+            reg_val = _t("tc_regime_nodata", regime=current_regime.upper())
+        else:
+            reg_val = (
+                f'{_t("tc_regime_your", regime=current_regime.upper(), side=side)}: '
+                f'<span class="{_exp_cls(reg_exp)}">{_money_signed(reg_exp)}</span>/trade'
+            )
+    else:
+        reg_val = _t("tc_regime_unavailable")
+
+    rows = (
+        f'<div class="tc-row"><span class="i">1</span>'
+        f'<span class="k">{_t("tc_your_history")}</span>'
+        f'<span class="v">{hist_val}</span></div>'
+        f'<div class="tc-row"><span class="i">2</span>'
+        f'<span class="k">{_t("tc_smart_money")}</span>'
+        f'<span class="v">{sm_val}</span></div>'
+        f'<div class="tc-row"><span class="i">3</span>'
+        f'<span class="k">{_t("tc_regime")}</span>'
+        f'<span class="v">{reg_val}</span></div>'
+    )
+
+    st.markdown(
+        f'<div class="ew-tc {v_cls}">'
+        f'<div class="tc-verdict">{verdict_txt}</div>'
+        f'<div class="tc-rows">{rows}</div>'
+        f'<div class="tc-foot">{_t("tc_foot")}</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+
 _render_tldr(trades, slices, overall)
 _render_anchor_nav()
+
+# Trade Check — the in-browser pre-trade verdict (Wave 3). Uses the full
+# (unfiltered) history so the verdict ignores the slicer selection.
+_tc_consensus = _consensus_cached()
+_render_trade_check(_raw_trades, _tc_consensus, _current_btc_regime())
 
 
 # --------------------------------------------------------------------------- #
@@ -6793,10 +7087,9 @@ with st.expander(_t("exp_risk"), expanded=False):
 # --------------------------------------------------------------------------- #
 
 with st.spinner(_t("sm_loading")):
-    try:
-        _smart_money = _fetch_smart_money_consensus(n_top=20, window="30d")
-    except Exception as _e:  # noqa: BLE001
-        _smart_money = {"error": str(_e), "traders": [], "consensus_per_symbol": {}}
+    # Reuse the Trade Check's cached consensus so the leaderboard + position
+    # fetches happen once per 15 min for the whole page.
+    _smart_money = _tc_consensus if isinstance(_tc_consensus, dict) else _consensus_cached()
 
 # Your positions vs Smart Money — only when a real wallet is loaded.
 _active_addr_for_open = (st.session_state.get("active_address") or "").strip()
