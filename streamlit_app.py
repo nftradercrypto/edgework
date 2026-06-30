@@ -5660,125 +5660,6 @@ def _classify_user_vs_smart_money(
     )
 
 
-@st.cache_data(ttl=3600, show_spinner=False)
-def _fetch_symbol_ids() -> dict[str, int]:
-    """symbol → numeric SoDEX symbolID, needed to build order params.
-
-    Field name for the id varies across gateway versions — try the known
-    spellings. Empty dict on failure (simulation then uses 0, which is fine:
-    nothing is transmitted)."""
-    try:
-        from edgework.sodex_client import SodexClient
-
-        with SodexClient(
-            user_address="0x0000000000000000000000000000000000000000"
-        ) as c:
-            syms = c.get_perps_symbols()
-        out: dict[str, int] = {}
-        for s in syms or []:
-            # Live gateway uses `name` + `id` (verified 2026-06); keep the
-            # alternate spellings as fallbacks for other gateway versions.
-            name = s.get("name") or s.get("symbol") or s.get("displayName")
-            sid = s.get("id") or s.get("symbolID") or s.get("symbolId")
-            if name and sid is not None:
-                out[str(name)] = int(sid)
-        return out
-    except Exception:  # noqa: BLE001
-        return {}
-
-
-def _render_w3_execution_layer(action_items: list[tuple[dict, str]]) -> None:
-    """Wave 3 preview: per-position close buttons that build and sign a real
-    EIP-712 reduce-only order with an ephemeral key — and send nothing.
-
-    Proves the full insight→action pipeline (payload hashing, struct hashing,
-    domain separation, ECDSA, wire format) with zero custody risk. The local
-    execution companion reuses the identical code path with a real key.
-    """
-    if not action_items:
-        return
-
-    st.markdown(
-        f'<div class="ew-sim-eyebrow">{_t("w3_eyebrow")}</div>',
-        unsafe_allow_html=True,
-    )
-
-    sym_ids = _fetch_symbol_ids()
-    n_cols = min(4, len(action_items))
-    cols = st.columns(n_cols)
-    for i, (pos, status_cls) in enumerate(action_items):
-        with cols[i % n_cols]:
-            if st.button(
-                _t("w3_close_btn", symbol=pos["symbol"]),
-                key=f"w3_sim_{pos['symbol']}_{pos['side']}",
-                use_container_width=True,
-            ):
-                from edgework.exchange.order_builder import (
-                    plan_close_from_position,
-                    simulate,
-                )
-
-                reason = (
-                    "contrarian_to_smart_money"
-                    if status_cls in ("contrarian", "weak-contrarian")
-                    else "manual_close"
-                )
-                plan = plan_close_from_position(
-                    pos,
-                    symbol_id=sym_ids.get(pos["symbol"], 0),
-                    # Placeholder — the local companion injects the trader's
-                    # real numeric account id from their own .env.
-                    account_id=0,
-                    reason=reason,
-                )
-                action_type, params = plan.to_order_params()
-                sim = simulate(action_type, params)
-                st.session_state["w3_sim"] = {
-                    "symbol": pos["symbol"],
-                    "close_side": plan.close_side.name,
-                    "qty": plan.quantity,
-                    "reason": plan.reason_label,
-                    "body": sim.body,
-                    "digest": sim.digest,
-                    "signature": sim.typed_signature,
-                    "signer": sim.ephemeral_signer,
-                    "nonce": sim.nonce,
-                }
-
-    _sim = st.session_state.get("w3_sim")
-    if not _sim:
-        return
-
-    st.markdown(
-        '<div class="ew-sim">'
-        '<div class="ew-sim-head">'
-        f'<span class="tag">{_t("w3_sim_tag")}</span>'
-        f'<span class="meta">{_sim["reason"]}</span>'
-        '</div>'
-        '<div class="ew-sim-grid">'
-        f'<div><span class="k">{_t("up_h_symbol")}</span>'
-        f'<span class="v">{_sim["symbol"]}</span></div>'
-        f'<div><span class="k">{_t("w3_action")}</span>'
-        f'<span class="v">{_sim["close_side"]} {_sim["qty"]} · {_t("w3_reduce_only")}</span></div>'
-        f'<div><span class="k">Nonce</span><span class="v">{_sim["nonce"]}</span></div>'
-        f'<div><span class="k">{_t("w3_signer")}</span>'
-        f'<span class="v">{_sim["signer"][:10]}…{_sim["signer"][-6:]}</span></div>'
-        f'<div class="wide"><span class="k">{_t("w3_digest")}</span>'
-        f'<span class="v mono">{_sim["digest"]}</span></div>'
-        f'<div class="wide"><span class="k">{_t("w3_signature")}</span>'
-        f'<span class="v mono">{_sim["signature"]}</span></div>'
-        '</div>'
-        f'<div class="ew-sim-note">{_t("w3_note")}</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-    with st.expander(_t("w3_body_label"), expanded=False):
-        st.code(json.dumps(_sim["body"], indent=2), language="json")
-    if st.button(_t("w3_dismiss"), key="w3_dismiss_btn"):
-        st.session_state.pop("w3_sim", None)
-        st.rerun()
-
-
 def _render_user_positions_vs_smart_money(
     user_positions: list[dict],
     consensus: dict,
@@ -5798,12 +5679,10 @@ def _render_user_positions_vs_smart_money(
 
     rows_html = ""
     n_contrarian = 0
-    action_items: list[tuple[dict, str]] = []  # feeds the Wave 3 close buttons
     for pos in user_positions:
         symbol = pos["symbol"]
         sm = consensus.get(symbol)
         status_label, status_cls, narrative = _classify_user_vs_smart_money(pos, sm)
-        action_items.append((pos, status_cls))
         if status_cls in ("contrarian", "weak-contrarian"):
             n_contrarian += 1
 
@@ -5875,9 +5754,6 @@ def _render_user_positions_vs_smart_money(
 
     grid_html = f'<div class="ew-up-grid">{header_html}{rows_html}</div>'
     st.markdown(section_html + warning_html + grid_html, unsafe_allow_html=True)
-
-    # Wave 3 — insight→action: simulate a signed reduce-only close per position.
-    _render_w3_execution_layer(action_items)
 
 
 def _render_smart_money_watch(data: dict) -> None:
@@ -6940,62 +6816,6 @@ _render_smart_money_watch(_smart_money)
 # the reconstructed smart-money book. Only meaningful with a real wallet.
 if _active_addr_for_open:
     _render_contrarian_track_record(trades, _smart_money, _active_addr_for_open)
-
-
-def _render_alert_wizard(address: str) -> None:
-    """Discord divergence-alert setup: test a webhook + the command to run
-    the local watcher. The webhook URL stays in session_state only — never
-    persisted server-side. Real continuous alerting runs locally via
-    scripts/alert_bot.py."""
-    st.markdown(
-        '<div class="ew-section">'
-        f'<div class="ew-section-title">{_t("al_title")}</div>'
-        f'<div class="ew-section-sub">{_t("al_sub")}</div>'
-        '</div>',
-        unsafe_allow_html=True,
-    )
-
-    webhook = st.text_input(
-        _t("al_webhook_label"),
-        value=st.session_state.get("al_webhook", ""),
-        placeholder="https://discord.com/api/webhooks/…",
-        type="password",
-        key="al_webhook",
-        help=_t("al_help"),
-    )
-
-    if st.button(_t("al_test_btn"), key="al_test_btn"):
-        url = (webhook or "").strip()
-        if not url:
-            st.warning(_t("al_need_url"))
-        else:
-            try:
-                from edgework.alerts import send_test
-
-                code = send_test(url)
-                if code in (200, 204):
-                    st.success(_t("al_test_ok"))
-                else:
-                    st.error(_t("al_test_fail", code=code))
-            except Exception as e:  # noqa: BLE001
-                st.error(_t("al_test_err", err=str(e)[:120]))
-
-    st.caption(_t("al_run_label"))
-    _addr = address or "0xYOUR_WALLET"
-    st.code(
-        "export SODEX_USER_ADDRESS=" + _addr + "\n"
-        'export EDGEWORK_DISCORD_WEBHOOK="<your-webhook-url>"\n'
-        "python scripts/alert_bot.py            # loop, alert on new divergences\n"
-        "python scripts/alert_bot.py --once     # single check\n"
-        "python scripts/alert_bot.py --test     # webhook connectivity",
-        language="bash",
-    )
-    st.caption(_t("al_run_note"))
-
-
-if _active_addr_for_open:
-    _render_alert_wizard(_active_addr_for_open)
-
 
 # --------------------------------------------------------------------------- #
 # Full Diagnostic — single AI-powered consolidated analysis. Replaces the old
