@@ -894,6 +894,22 @@ st.markdown(
     .ew-tc .tc-row .v .pos {{ color: {GREEN}; font-weight: 700; }}
     .ew-tc .tc-row .v .neg {{ color: {RED};   font-weight: 700; }}
     .ew-tc .tc-row .v .lown {{ color: {ACCENT}; font-size: 11px; }}
+    .ew-tc .tc-size {{
+        display: flex; align-items: baseline; gap: 14px;
+        padding: 11px 20px;
+        border-top: 1px solid {BORDER};
+        background: rgba(255,255,255,0.015);
+    }}
+    .ew-tc .tc-size .k {{
+        font-family: 'Space Mono', monospace; font-size: 10px;
+        letter-spacing: 0.16em; text-transform: uppercase; color: {DIM};
+    }}
+    .ew-tc .tc-size .v {{
+        font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700;
+        color: {TEXT};
+    }}
+    .ew-tc .tc-size .v.pos {{ color: {GREEN}; }}
+    .ew-tc .tc-size .v.neg {{ color: {RED}; }}
     .ew-tc .tc-foot {{
         padding: 10px 20px 12px;
         border-top: 1px solid {BORDER};
@@ -901,6 +917,80 @@ st.markdown(
         font-size: 9.5px;
         color: {DIM};
         letter-spacing: 0.04em;
+    }}
+
+    /* ── Edge Score card (hero) ── */
+    @property --ew-ecn {{ syntax: '<integer>'; initial-value: 0; inherits: false; }}
+    .ew-edge {{
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        border: 1px solid {BORDER_HI};
+        border-radius: 14px;
+        background:
+            radial-gradient(90% 140% at 100% 0%, rgba(245,132,31,0.08), transparent 55%),
+            linear-gradient(180deg, {SURFACE}, {BG});
+        padding: 22px 28px;
+        margin: 8px 0 12px;
+        animation: ew-fadeup .5s ease-out both;
+    }}
+    @keyframes ew-fadeup {{ from {{ opacity: 0; transform: translateY(10px); }}
+                            to   {{ opacity: 1; transform: translateY(0); }} }}
+    .ew-edge-ring {{ position: relative; width: 128px; height: 128px; flex: none; }}
+    .ew-edge-ring svg {{ width: 128px; height: 128px; transform: rotate(-90deg); }}
+    .ew-edge-ring .bg {{ fill: none; stroke: {BORDER_HI}; stroke-width: 10; }}
+    .ew-edge-ring .arc {{
+        fill: none; stroke-width: 10; stroke-linecap: round;
+        stroke-dasharray: var(--circ);
+        stroke-dashoffset: var(--circ);
+        filter: drop-shadow(0 0 6px rgba(245,132,31,0.4));
+        animation: ew-ringfill 1.35s ease-out forwards;
+    }}
+    @keyframes ew-ringfill {{ to {{ stroke-dashoffset: var(--off); }} }}
+    .ew-edge-numwrap {{
+        position: absolute; inset: 0;
+        display: flex; flex-direction: column;
+        align-items: center; justify-content: center;
+    }}
+    .ew-ec-num {{
+        font-family: 'Outfit', sans-serif; font-weight: 700;
+        font-size: 40px; color: {TEXT}; line-height: 1;
+        counter-reset: ecn var(--ew-ecn);
+    }}
+    .ew-ec-num::after {{ content: counter(ecn); }}
+    .ew-edge-numwrap .den {{
+        font-family: 'Space Mono', monospace; font-size: 10px; color: {DIM};
+        margin-top: 3px; letter-spacing: 0.1em;
+    }}
+    .ew-edge-meta {{ flex: 1; min-width: 0; }}
+    .ew-edge-meta .eyebrow {{
+        font-family: 'Space Mono', monospace; font-size: 10px;
+        letter-spacing: 0.24em; color: {ACCENT}; font-weight: 700;
+    }}
+    .ew-edge-meta .grade {{
+        font-family: 'Outfit', sans-serif; font-weight: 700;
+        font-size: 30px; line-height: 1.05; margin: 3px 0 4px;
+    }}
+    .ew-edge-meta .desc {{
+        font-family: 'Outfit', sans-serif; font-size: 13px;
+        color: {MUTED}; line-height: 1.45; max-width: 560px;
+    }}
+    .ew-edge-stats {{
+        display: flex; flex-wrap: wrap; gap: 10px 30px; margin-top: 14px;
+    }}
+    .ew-edge-stats .k {{
+        font-family: 'Space Mono', monospace; font-size: 9.5px;
+        letter-spacing: 0.16em; text-transform: uppercase; color: {DIM};
+        display: block; margin-bottom: 3px;
+    }}
+    .ew-edge-stats .v {{
+        font-family: 'Outfit', sans-serif; font-size: 18px;
+        font-weight: 700; color: {TEXT};
+    }}
+    .ew-edge-stats .v.pos {{ color: {GREEN}; }}
+    .ew-edge-stats .v.neg {{ color: {RED}; }}
+    @media (max-width: 740px) {{
+        .ew-edge {{ flex-direction: column; text-align: center; }}
     }}
 
     /* ── TL;DR card (10-second summary) ── */
@@ -1735,6 +1825,18 @@ st.markdown(
         width: 18px; height: 1px; background: {DIM};
     }}
     .ew-verdict-eyebrow .v {{ color: {MUTED}; }}
+    .ew-conf-meter {{
+        display: inline-block; width: 78px; height: 6px;
+        background: {BORDER_HI}; border-radius: 3px; overflow: hidden;
+        vertical-align: middle; margin: 0 9px;
+    }}
+    .ew-conf-meter .fill {{
+        display: block; height: 100%; border-radius: 3px;
+        background: linear-gradient(90deg, {ACCENT}, #ffb347);
+        transform: scaleX(0); transform-origin: left;
+        animation: ew-confgrow 1.1s ease-out .15s forwards;
+    }}
+    @keyframes ew-confgrow {{ to {{ transform: scaleX(1); }} }}
     .ew-verdict-grid {{
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -2477,6 +2579,43 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "land_t2":       {"EN": "Public API · no login", "PT": "API pública · sem login"},
     "land_t3":       {"EN": "No private key, ever", "PT": "Nunca pede chave privada"},
 
+    # Edge Score card
+    "eg_eyebrow":     {"EN": "EDGE SCORE", "PT": "EDGE SCORE"},
+    "eg_pf":          {"EN": "Profit factor", "PT": "Fator de lucro"},
+    "eg_consistency": {"EN": "Consistency",   "PT": "Consistência"},
+    "eg_winrate":     {"EN": "Win rate",      "PT": "Taxa de acerto"},
+    "eg_net":         {"EN": "Net PNL",       "PT": "PNL líquido"},
+    "eg_download":    {"EN": "⬇ Download Edge Card (share on X)",
+                       "PT": "⬇ Baixar Edge Card (compartilhar no X)"},
+    "eg_verified":    {"EN": "VERIFIED", "PT": "VERIFICADO"},
+    "eg_sub_hit":     {"EN": "Hit rate",   "PT": "Taxa de acerto"},
+    "eg_sub_netp":    {"EN": "Net profit", "PT": "Lucro líquido"},
+    "eg_sub_netn":    {"EN": "Net loss",   "PT": "Prejuízo líquido"},
+    "eg_pf_exc":      {"EN": "Exceptional efficiency", "PT": "Eficiência excepcional"},
+    "eg_pf_strong":   {"EN": "Strong efficiency",      "PT": "Eficiência forte"},
+    "eg_pf_pos":      {"EN": "Net positive",           "PT": "Positivo no líquido"},
+    "eg_pf_weak":     {"EN": "Losing more than winning", "PT": "Perde mais do que ganha"},
+    "eg_badge_elite":  {"EN": "EXCEPTIONAL PERFORMANCE", "PT": "DESEMPENHO EXCEPCIONAL"},
+    "eg_badge_strong": {"EN": "STRONG PERFORMANCE",      "PT": "DESEMPENHO FORTE"},
+    "eg_badge_solid":  {"EN": "SOLID PERFORMANCE",       "PT": "DESEMPENHO SÓLIDO"},
+    "eg_badge_dev":    {"EN": "DEVELOPING",              "PT": "EM DESENVOLVIMENTO"},
+    "eg_badge_leak":   {"EN": "NEEDS WORK",              "PT": "PRECISA MELHORAR"},
+    "eg_elite":   {"EN": "Elite edge",       "PT": "Edge de elite"},
+    "eg_elite_d": {"EN": "Consistently profitable across conditions with a strong profit factor. This is a real, durable edge.",
+                   "PT": "Consistentemente lucrativo em várias condições, com fator de lucro forte. Um edge real e durável."},
+    "eg_strong":   {"EN": "Strong edge",     "PT": "Edge forte"},
+    "eg_strong_d": {"EN": "You make more than you lose and it holds across most conditions — a genuine, repeatable edge.",
+                    "PT": "Você ganha mais do que perde e isso se sustenta na maioria das condições — um edge genuíno e repetível."},
+    "eg_solid":   {"EN": "Solid edge",       "PT": "Edge sólido"},
+    "eg_solid_d": {"EN": "Positive overall, but the edge concentrates in some setups and leaks in others. Cut the leaks.",
+                   "PT": "Positivo no geral, mas o edge se concentra em alguns setups e vaza em outros. Corte os vazamentos."},
+    "eg_dev":   {"EN": "Developing",         "PT": "Em desenvolvimento"},
+    "eg_dev_d": {"EN": "The pieces are there but inconsistent. Lean into your profitable buckets and drop the rest.",
+                 "PT": "As peças existem, mas inconsistentes. Foque nos buckets lucrativos e largue o resto."},
+    "eg_leak":   {"EN": "Leaking edge",      "PT": "Edge vazando"},
+    "eg_leak_d": {"EN": "You're giving back more than you make. The diagnostic below shows exactly where.",
+                  "PT": "Você está devolvendo mais do que ganha. O diagnóstico abaixo mostra exatamente onde."},
+
     # Sidebar
     "sb_data_source": {"EN": "Data source", "PT": "Fonte de dados"},
     "sb_footnote":    {"EN": "Peer benchmark vs top traders is fetched automatically — no manual input needed.",
@@ -2532,6 +2671,20 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
                           "PT": "✅ Esse {side} bate com seu edge E com o smart money — sinal verde."},
     "tc_foot":    {"EN": "Read-only decision support — Edgework never places the order; it tells you whether to.",
                    "PT": "Suporte à decisão, somente leitura — o Edgework nunca envia a ordem; ele te diz se vale."},
+    "tc_market":  {"EN": "Live market", "PT": "Mercado ao vivo"},
+    "tc_mark":    {"EN": "mark",    "PT": "mark"},
+    "tc_funding": {"EN": "funding", "PT": "funding"},
+    "tc_fund_favors":  {"EN": "favors your side",  "PT": "a favor do seu lado"},
+    "tc_fund_against": {"EN": "against your side",  "PT": "contra o seu lado"},
+    "tc_vs_entry":     {"EN": "vs your median entry", "PT": "vs sua entrada mediana"},
+    "tc_market_unavailable": {"EN": "price unavailable right now",
+                              "PT": "preço indisponível agora"},
+    "tc_size":         {"EN": "Suggested size", "PT": "Tamanho sugerido"},
+    "tc_size_up":      {"EN": "Size up — full conviction",   "PT": "Aumente — convicção total"},
+    "tc_size_normal":  {"EN": "Normal size",                 "PT": "Tamanho normal"},
+    "tc_size_half":    {"EN": "Half size, or wait for a better setup", "PT": "Metade do tamanho, ou espere um setup melhor"},
+    "tc_size_quarter": {"EN": "Quarter size, or stand aside", "PT": "Um quarto do tamanho, ou fique de fora"},
+    "tc_size_skip":    {"EN": "Skip — no size here",         "PT": "Pule — sem tamanho aqui"},
 
     # One-click demo
     "demo_btn":      {"EN": "🎲 No wallet? Try a top trader's →",
@@ -3907,6 +4060,288 @@ if _active_addr_for_rank:
 
 
 # --------------------------------------------------------------------------- #
+# Edge Score — a single 0-100 composite + a shareable branded Edge Card.
+# --------------------------------------------------------------------------- #
+
+def _compute_edge_score(ov, slices_dict: dict, trades_df: pd.DataFrame):
+    """A single, defensible 0-100 read of how real a trader's edge is.
+
+    Three components, all size-independent so they compare across wallets:
+      · Profit factor (0-45): gross wins ÷ gross losses.
+      · Consistency (0-30): share of well-sampled dimension buckets that are
+        actually profitable — rewards an edge that holds across conditions,
+        not one lucky bucket.
+      · Edge quality (0-25): positive expectancy scaled by win rate.
+    """
+    pf = 1.0
+    if trades_df is not None and "pnl" in getattr(trades_df, "columns", []):
+        pnl = trades_df["pnl"].dropna()
+        gw = float(pnl[pnl > 0].sum())
+        gl = abs(float(pnl[pnl <= 0].sum()))
+        pf = (gw / gl) if gl > 0 else 3.0
+    pf_score = max(0.0, min(1.0, (pf - 1.0) / 2.0)) * 45.0
+
+    prof = tot = 0
+    for _k, df in (slices_dict or {}).items():
+        if df is None or getattr(df, "empty", True):
+            continue
+        if "expectancy" not in df.columns or "n_trades" not in df.columns:
+            continue
+        for _, r in df[df["n_trades"] >= 5].iterrows():
+            tot += 1
+            if float(r["expectancy"]) > 0:
+                prof += 1
+    consistency = (prof / tot) if tot else 0.0
+    cons_score = consistency * 30.0
+
+    wr = float(ov.winrate)
+    if ov.expectancy > 0:
+        edge_q = (0.5 + 0.5 * min(wr / 0.55, 1.0)) * 25.0
+    else:
+        edge_q = 0.2 * wr * 25.0
+
+    score = int(round(max(0.0, min(100.0, pf_score + cons_score + edge_q))))
+    return score, {"pf": pf, "consistency": consistency, "wr": wr,
+                   "expectancy": float(ov.expectancy)}
+
+
+def _edge_grade(score: int) -> tuple[str, str, str]:
+    """(grade label i18n-key, hex color, one-line description i18n-key)."""
+    if score >= 80:
+        return "eg_elite", GREEN, "eg_elite_d"
+    if score >= 62:
+        return "eg_strong", GREEN, "eg_strong_d"
+    if score >= 45:
+        return "eg_solid", ACCENT, "eg_solid_d"
+    if score >= 28:
+        return "eg_dev", ACCENT, "eg_dev_d"
+    return "eg_leak", RED, "eg_leak_d"
+
+
+def _edge_card_png(score: int, grade: str, color_hex: str, wallet: str,
+                   stats: list[tuple], badge: str, verified: str) -> bytes:
+    """Render the branded, share-ready Edge Card (16:9) as a PNG.
+
+    stats: list of (icon_kind, label, value, subtitle) where icon_kind is
+    one of {"pf", "wr", "net"}.
+    """
+    import math
+    from io import BytesIO
+
+    from PIL import Image, ImageDraw, ImageFilter, ImageFont
+
+    def _font(size: int, bold: bool = False):
+        cands = (
+            ["C:/Windows/Fonts/arialbd.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"]
+            if bold else
+            ["C:/Windows/Fonts/arial.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]
+        )
+        for c in cands:
+            try:
+                return ImageFont.truetype(c, size)
+            except Exception:  # noqa: BLE001
+                pass
+        try:
+            return ImageFont.load_default(size)
+        except Exception:  # noqa: BLE001
+            return ImageFont.load_default()
+
+    def _hx(h):
+        h = h.lstrip("#")
+        return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+
+    def _tracked(dr, xy, text, font, fill, tr):
+        x, y = xy
+        for ch in text:
+            dr.text((x, y), ch, font=font, fill=fill)
+            x += dr.textlength(ch, font=font) + tr
+        return x
+
+    def _tracked_w(dr, text, font, tr):
+        return sum(dr.textlength(ch, font=font) + tr for ch in text) - tr
+
+    def _center(dr, xy, text, font, fill):
+        b = dr.textbbox((0, 0), text, font=font)
+        dr.text((xy[0]-(b[2]-b[0])/2, xy[1]-(b[3]-b[1])/2-b[1]), text, font=font, fill=fill)
+
+    def _star(dr, cx, cy, r, fill):
+        pts = []
+        for i in range(10):
+            ang = -math.pi/2 + i*math.pi/5
+            rr = r if i % 2 == 0 else r*0.42
+            pts.append((cx+rr*math.cos(ang), cy+rr*math.sin(ang)))
+        dr.polygon(pts, fill=fill)
+
+    def _stat_icon(dr, cx, cy, r, kind, gr):
+        dr.ellipse([cx-r, cy-r, cx+r, cy+r], fill=_hx("#0f2418"))
+        if kind == "pf":
+            x0 = cx - 6.5
+            for i, h in enumerate((8, 13, 18)):
+                x = x0 + i*9
+                dr.rounded_rectangle([x, cy+9-h, x+5, cy+9], radius=2, fill=gr)
+        elif kind == "wr":
+            dr.ellipse([cx-11, cy-11, cx+11, cy+11], outline=gr, width=3)
+            dr.ellipse([cx-4, cy-4, cx+4, cy+4], fill=gr)
+        else:
+            _center(dr, (cx, cy), "$", _font(26, True), gr)
+
+    W, H = 1600, 900
+    green = _hx(color_hex)
+    orange, txt, mut, dim = _hx("#f5841f"), _hx("#f5f5f5"), _hx("#a8a8a8"), _hx("#6f6f6f")
+
+    img = Image.new("RGB", (W, H), _hx("#050506"))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle([24, 24, W-24, H-24], radius=30, fill=_hx("#0e0e11"),
+                        outline=_hx("#202024"), width=2)
+
+    d.rounded_rectangle([92, 86, 103, 158], radius=5, fill=orange)
+    d.text((124, 78), "Edgework", font=_font(66, True), fill=txt)
+    _tracked(d, (126, 160), "TRADE ANALYTICS", _font(23), mut, 6)
+
+    _tracked(d, (94, 266), "EDGE SCORE", _font(26, True), orange, 5)
+    d.text((90, 298), grade, font=_font(104, True), fill=green)
+
+    for (x0, x1), (kind, label, value, sub) in zip(
+        [(90, 372), (392, 674), (694, 1012)], stats
+    ):
+        d.rounded_rectangle([x0, 500, x1, 700], radius=18, fill=_hx("#161619"),
+                            outline=_hx("#26262c"), width=2)
+        _stat_icon(d, x0+40, 548, 24, kind, green)
+        _tracked(d, (x0+76, 538), label, _font(21), mut, 1)
+        d.text((x0+28, 574), value, font=_font(46, True), fill=txt)
+        d.text((x0+30, 642), sub, font=_font(20), fill=dim)
+
+    # Ring with glow
+    cx, cy, r, wd = 1250, 375, 168, 28
+    glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    sweep = 360 * score / 100
+    gd.arc([cx-r, cy-r, cx+r, cy+r], start=-90, end=-90+sweep, fill=green+(255,), width=wd+6)
+    glow = glow.filter(ImageFilter.GaussianBlur(16))
+    img = Image.alpha_composite(img.convert("RGBA"), glow).convert("RGB")
+    d = ImageDraw.Draw(img)
+    d.arc([cx-r, cy-r, cx+r, cy+r], start=0, end=360, fill=_hx("#242428"), width=wd)
+    d.arc([cx-r, cy-r, cx+r, cy+r], start=-90, end=-90+sweep, fill=green, width=wd)
+    for ang in (-90, -90+sweep):
+        a = math.radians(ang)
+        ex, ey = cx+r*math.cos(a), cy+r*math.sin(a)
+        d.ellipse([ex-wd/2, ey-wd/2, ex+wd/2, ey+wd/2], fill=green)
+    _center(d, (cx, cy-18), str(score), _font(150, True), txt)
+    _center(d, (cx, cy+92), "/ 100", _font(40), mut)
+
+    # Badge pill under the ring
+    bf = _font(22, True)
+    bw = _tracked_w(d, badge, bf, 3) + 70
+    bx0 = cx - bw/2
+    d.rounded_rectangle([bx0, 668, bx0+bw, 726], radius=29,
+                        fill=_hx("#0f2016"), outline=green, width=2)
+    _star(d, bx0+32, 697, 11, green)
+    _tracked(d, (bx0+52, 686), badge, bf, green, 3)
+
+    # Footer
+    d.line([90, 772, W-90, 772], fill=_hx("#202024"), width=1)
+    gcx, gcy = 108, 812
+    d.ellipse([gcx-13, gcy-13, gcx+13, gcy+13], outline=mut, width=2)
+    d.ellipse([gcx-6, gcy-13, gcx+6, gcy+13], outline=mut, width=2)
+    d.line([gcx-13, gcy, gcx+13, gcy], fill=mut, width=2)
+    foot = (f"edgework.streamlit.app   ·   {wallet[:6]}…{wallet[-4:]}"
+            if wallet else "edgework.streamlit.app")
+    d.text((134, 798), foot, font=_font(24), fill=mut)
+    vf = _font(24, True)
+    vx = W - 90 - _tracked_w(d, verified, vf, 3)
+    _tracked(d, (vx, 800), verified, vf, green, 3)
+    sx, sy = vx-44, 812
+    d.polygon([(sx, sy-14), (sx+13, sy-9), (sx+13, sy+3), (sx, sy+14),
+               (sx-13, sy+3), (sx-13, sy-9)], outline=green, width=2)
+    d.line([sx-5, sy, sx-1, sy+5], fill=green, width=2)
+    d.line([sx-1, sy+5, sx+6, sy-5], fill=green, width=2)
+
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
+def _render_edge_card(trades_df: pd.DataFrame, slices_dict: dict, ov,
+                      wallet: str) -> None:
+    """The hero: a 0-100 Edge Score in an animated ring + a download button
+    that exports a branded, share-ready card."""
+    if trades_df is None or trades_df.empty or ov.n_trades == 0:
+        return
+    score, meta = _compute_edge_score(ov, slices_dict, trades_df)
+    g_key, color, d_key = _edge_grade(score)
+    grade = _t(g_key)
+
+    import math
+    r = 54
+    circ = 2 * math.pi * r
+    off = circ * (1 - score / 100)
+
+    def _m(x):
+        s = "−" if x < 0 else "+"
+        return f"{s}${abs(x):,.0f}"
+
+    net_cls = "pos" if ov.total_pnl >= 0 else "neg"
+    pf = meta["pf"]
+
+    st.markdown(
+        f'<style>@keyframes ew-ec-{score} {{ to {{ --ew-ecn: {score}; }} }}'
+        f'.ew-ec-num.s{score} {{ animation: ew-ec-{score} 1.35s ease-out forwards; }}</style>'
+        '<div class="ew-edge">'
+        '<div class="ew-edge-ring">'
+        '<svg viewBox="0 0 128 128">'
+        '<circle class="bg" cx="64" cy="64" r="54"/>'
+        f'<circle class="arc" cx="64" cy="64" r="54" '
+        f'style="--circ:{circ:.1f};--off:{off:.1f};stroke:{color}"/>'
+        '</svg>'
+        f'<div class="ew-edge-numwrap"><span class="ew-ec-num s{score}"></span>'
+        '<span class="den">/100</span></div>'
+        '</div>'
+        '<div class="ew-edge-meta">'
+        f'<div class="eyebrow">{_t("eg_eyebrow")}</div>'
+        f'<div class="grade" style="color:{color}">{grade}</div>'
+        f'<div class="desc">{_t(d_key)}</div>'
+        '<div class="ew-edge-stats">'
+        f'<div><span class="k">{_t("eg_pf")}</span>'
+        f'<span class="v">{pf:.2f}</span></div>'
+        f'<div><span class="k">{_t("eg_consistency")}</span>'
+        f'<span class="v">{meta["consistency"]:.0%}</span></div>'
+        f'<div><span class="k">{_t("eg_winrate")}</span>'
+        f'<span class="v">{meta["wr"]:.0%}</span></div>'
+        f'<div><span class="k">{_t("eg_net")}</span>'
+        f'<span class="v {net_cls}">{_m(ov.total_pnl)}</span></div>'
+        '</div>'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
+
+    try:
+        # Subtitles for the card's stat tiles.
+        pf_sub = ("eg_pf_exc" if pf >= 2 else "eg_pf_strong" if pf >= 1.5
+                  else "eg_pf_pos" if pf >= 1 else "eg_pf_weak")
+        net_sub = "eg_sub_netp" if ov.total_pnl >= 0 else "eg_sub_netn"
+        badge_key = ("eg_badge_elite" if score >= 80 else "eg_badge_strong" if score >= 62
+                     else "eg_badge_solid" if score >= 45 else "eg_badge_dev"
+                     if score >= 28 else "eg_badge_leak")
+        png = _edge_card_png(
+            score, grade, color, wallet or "",
+            [
+                ("pf",  _t("eg_pf").upper(),      f"{pf:.2f}",        _t(pf_sub)),
+                ("wr",  _t("eg_winrate").upper(), f"{meta['wr']:.0%}", _t("eg_sub_hit")),
+                ("net", _t("eg_net").upper(),     _m(ov.total_pnl),   _t(net_sub)),
+            ],
+            _t(badge_key), _t("eg_verified"),
+        )
+        st.download_button(
+            _t("eg_download"), data=png,
+            file_name=f"edgework-edge-score-{score}.png",
+            mime="image/png", key="edge_card_dl",
+        )
+    except Exception:  # noqa: BLE001 — the on-screen card is the primary deliverable
+        pass
+
+
+# --------------------------------------------------------------------------- #
 # TL;DR card — the 10-second read. Deterministic, computed from slices.
 # --------------------------------------------------------------------------- #
 
@@ -4062,6 +4497,40 @@ def _sm_bias_for(cs: dict | None) -> tuple[str | None, str]:
     return None, ""
 
 
+@st.cache_data(ttl=120, show_spinner=False)
+def _symbol_market(symbol: str) -> dict:
+    """Current mark price + funding rate for a symbol (cached 2 min)."""
+    try:
+        from edgework.sodex_client import SodexClient
+
+        with SodexClient(
+            user_address="0x0000000000000000000000000000000000000000"
+        ) as c:
+            rows = c.get_perps_mark_prices(symbol)
+        if not rows:
+            return {}
+        r = rows[0]
+        return {
+            "mark": float(r.get("markPrice") or 0) or None,
+            "funding": float(r.get("fundingRate") or 0),
+        }
+    except Exception:  # noqa: BLE001
+        return {}
+
+
+def _size_suggestion(score: int) -> tuple[str, str]:
+    """(i18n key, css class) for the position-size hint, driven by the verdict."""
+    if score >= 2:
+        return "tc_size_up", "pos"
+    if score == 1:
+        return "tc_size_normal", "pos"
+    if score == 0:
+        return "tc_size_half", "neutral"
+    if score == -1:
+        return "tc_size_quarter", "neg"
+    return "tc_size_skip", "neg"
+
+
 def _render_trade_check(raw_trades_df: pd.DataFrame, smart_money: dict,
                         current_regime: str | None) -> None:
     """Pre-trade verdict: check a hypothetical trade against your own history
@@ -4192,6 +4661,41 @@ def _render_trade_check(raw_trades_df: pd.DataFrame, smart_money: dict,
     else:
         reg_val = _t("tc_regime_unavailable")
 
+    # 4 — live market: mark price, funding, and distance from your median entry.
+    mkt = _symbol_market(symbol)
+    mkt_val = _t("tc_market_unavailable")
+    if mkt.get("mark"):
+        mark = mkt["mark"]
+        fund = mkt.get("funding", 0.0)
+        # Funding > 0 → longs pay shorts. So it's a cost for longs, income for shorts.
+        fund_pct = fund * 100
+        if abs(fund) < 1e-9:
+            fund_txt = f'{_t("tc_funding")} {fund_pct:+.4f}%'
+        else:
+            favors = (fund > 0 and side == "short") or (fund < 0 and side == "long")
+            fcls = "pos" if favors else "neg"
+            fword = _t("tc_fund_favors") if favors else _t("tc_fund_against")
+            fund_txt = (f'{_t("tc_funding")} <span class="{fcls}">{fund_pct:+.4f}%</span> '
+                        f'({fword})')
+        # Distance from the trader's own median entry on this symbol+side.
+        dist_txt = ""
+        if not sub.empty and "entry_price" in sub.columns:
+            med_entry = float(sub["entry_price"].dropna().median() or 0)
+            if med_entry > 0:
+                dpct = (mark - med_entry) / med_entry * 100
+                arrow = "↑" if dpct >= 0 else "↓"
+                dcls = "neg" if abs(dpct) > 3 else "neutral"
+                dist_txt = (f' · <span class="{dcls}">{arrow}{abs(dpct):.1f}%</span> '
+                            f'{_t("tc_vs_entry")}')
+        mkt_val = f'{_t("tc_mark")} ${mark:,.4g} · {fund_txt}{dist_txt}'
+
+    # Position-size suggestion driven by the verdict score.
+    sz_key, sz_cls = _size_suggestion(score)
+    size_html = (
+        f'<div class="tc-size"><span class="k">{_t("tc_size")}</span>'
+        f'<span class="v {sz_cls}">{_t(sz_key)}</span></div>'
+    )
+
     rows = (
         f'<div class="tc-row"><span class="i">1</span>'
         f'<span class="k">{_t("tc_your_history")}</span>'
@@ -4202,18 +4706,24 @@ def _render_trade_check(raw_trades_df: pd.DataFrame, smart_money: dict,
         f'<div class="tc-row"><span class="i">3</span>'
         f'<span class="k">{_t("tc_regime")}</span>'
         f'<span class="v">{reg_val}</span></div>'
+        f'<div class="tc-row"><span class="i">4</span>'
+        f'<span class="k">{_t("tc_market")}</span>'
+        f'<span class="v">{mkt_val}</span></div>'
     )
 
     st.markdown(
         f'<div class="ew-tc {v_cls}">'
         f'<div class="tc-verdict">{verdict_txt}</div>'
         f'<div class="tc-rows">{rows}</div>'
+        f'{size_html}'
         f'<div class="tc-foot">{_t("tc_foot")}</div>'
         '</div>',
         unsafe_allow_html=True,
     )
 
 
+_render_edge_card(trades, slices, overall,
+                  st.session_state.get("active_address") or "")
 _render_tldr(trades, slices, overall)
 _render_anchor_nav()
 
@@ -5382,7 +5892,7 @@ def _render_verdict(slices_dict, overall, trades_df: pd.DataFrame | None = None)
         <div class="ew-verdict-rule">
             <span class="arrow">→</span>
             <span class="text">{instruction}</span>
-            <span class="conf">{_conf_word} · <span class="v">{conf}%</span></span>
+            <span class="conf">{_conf_word}<span class="ew-conf-meter"><span class="fill" style="width:{conf}%"></span></span><span class="v">{conf}%</span></span>
         </div>
         <div class="ew-verdict-meta">
             <div class="cell">
