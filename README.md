@@ -6,7 +6,7 @@
 > preserved at tags
 > [`wave-1-final`](https://github.com/nftradercrypto/edgework/releases/tag/wave-1-final)
 > and [`wave-2-final`](https://github.com/nftradercrypto/edgework/releases/tag/wave-2-final).
-> The current `main` is **Wave 3 (final)**.
+> The current `main` is **Wave 3**.
 
 Edgework is a performance intelligence tool for serious traders on SoDEX.
 It turns your raw order history into the one thing PNL doesn't show:
@@ -14,48 +14,48 @@ It turns your raw order history into the one thing PNL doesn't show:
 actually make money, and the slices where you give it back.
 
 > Most traders discover that 60–80% of their losses come from
-> 10–20% of their setups. Edgework finds those setups, benchmarks
-> them against the SoDEX leaderboard, warns you when you're about to
-> trade against the smart-money book, and lets you act on it.
+> 10–20% of their setups. Edgework finds those setups, benchmarks them
+> against the SoDEX leaderboard, and — new in Wave 3 — gives you a
+> **verdict before you take your next trade**.
 
 Live app: **[edgework.streamlit.app](https://edgework.streamlit.app)**
 Submission: [SoSoValue Buildathon](https://app.akindo.io/wave-hacks/JBEQXgN4Zi2jA3wA)
 
-The four-wave arc: Wave 1 **measured** edge → Wave 2 **compared** it to the
-leaderboard → Wave 3 **acts** on it (alerts + execution).
+The arc: Wave 1 **measured** edge → Wave 2 **compared** it to the leaderboard →
+Wave 3 turns it into a **pre-trade decision** you can act on.
 
 ---
 
-## What's in Wave 3 — from analytics to action
+## What's new in Wave 3
 
-The Wave 2 judges asked for "tighter execution integration and risk hooks."
-Wave 3 closes that loop, while keeping custody strictly local.
+Everything below works by just visiting the site — no wallet to connect,
+nothing to install, no login. Paste any SoDEX address (or hit **Use demo
+data**, which loads a real top trader) and it's live.
 
-### 1 · Smart Money Divergence Alerts + risk-control hooks (Discord)
-A local, read-only watcher (`scripts/alert_bot.py`) pings your Discord the
-moment you open a position **against the qualified smart-money book** (same
-strong/weak bias thresholds as the live watch) **or** one that matches one of
-your own historically losing **2D risk patterns** (e.g. `SYMBOL LIT-USD +
-SIZE Q4`). Deduped so the same position never double-pings. Set it up from the
-in-app wizard (paste webhook → test → copy the run command). No private key,
-never trades.
+### 1 · Trade Check — the pre-trade verdict ⭐
+Thinking about a trade? Pick a **symbol + side** and Edgework tells you
+whether to take it — instantly — by combining three signals:
 
-### 2 · EIP-712 execution layer (insight → action)
-Reduce-only close orders signed with SoDEX's EIP-712 scheme. The **hosted app
-simulates only** — it builds and signs each order with an ephemeral key and
-shows you the exact digest, signature, and POST body, sending nothing. Real
-execution runs locally via `scripts/edgework_exec.py` with a **revocable SoDEX
-API key from your own `.env`** — same trust model as using the SoDEX frontend
-yourself. Every order is reduce-only by construction: it can only shrink risk.
+1. **Your own history** on that exact symbol+side (winrate, expectancy, n).
+2. **The live smart-money book** — aligned, contrarian, or no clear bias
+   (same thresholds as the Smart Money Watch).
+3. **Your edge in the current BTC regime** for that setup.
 
-### 3 · Contrarian track record (the evidence)
+A colour-coded verdict runs from *"🛑 strong skip"* to *"✅ green light"*.
+Flip long/short and it recomputes live. It's the risk-hook the Wave 2 judges
+asked for, delivered as a tool you actually *use* — honest about a read-only
+tool's limit: it won't place the order, it tells you whether to.
+
+### 2 · Contrarian track record
 Reconstructs the smart-money book at each of your past entries and shows how
-your aligned vs contrarian trades actually performed — the data that justifies
-turning the alert on.
+your aligned vs contrarian trades actually performed — the evidence behind the
+verdict.
 
-Plus a statistical-rigor pass (bootstrap-based verdict confidence, retries,
-parallel fetches, low-sample badges, fees decomposition, tilt detector) and a
-first-contact UX overhaul (TL;DR card, anchor nav, one-click demo, tooltips).
+### 3 · Statistical rigor + first-contact UX
+Bootstrap-based verdict confidence (no more decorative %), retries, parallel
+fetches, low-sample badges, fees decomposition, and a tilt detector — plus a
+TL;DR card, anchor nav, tooltips, and a full **visual redesign**: brand logo,
+a clean two-option sidebar, and an elegant above-the-fold landing.
 
 See [CHANGELOG.md](CHANGELOG.md) for the full list.
 
@@ -82,9 +82,8 @@ Refreshes every 15 min.
 ### 3 · Your Positions vs Smart Money
 Compares each of your open positions to the smart-money consensus on the
 same symbol. Flags **✓ aligned**, **⚠ contrarian** (≥3 traders or 2× notional
-dominance opposite to you), or **~ mixed**. The first step toward the
-Discord alert bot — once it's wired up, you get notified the moment you
-open a contrarian trade.
+dominance opposite to you), or **~ mixed** — the groundwork the Wave 3
+**Trade Check** turns into a pre-trade verdict.
 
 ### 4 · Volume-Ranked Wallet Banner
 Replaces the old PNL rank (skewed by 118k dormant wallets) with **30-day
@@ -154,21 +153,12 @@ edgework/
 │   ├── sodex_client.py      # SoDEX API client (read-only, account + leaderboard)
 │   ├── sosovalue_client.py  # SoSoValue API client (news, indexes, ETF flows)
 │   ├── slicer.py            # Conditional Performance Mapping core
-│   ├── qna.py               # Wave 2: Full diagnostic engine (Claude tool use)
-│   ├── smart_money.py       # Wave 3: pure consensus + open-positions fetch
-│   ├── alerts.py            # Wave 3: divergence + risk alerts, Discord, dedupe
-│   ├── risk.py              # Wave 3: 2D anti-pattern engine + position matcher
-│   ├── exchange/            # Wave 3: EIP-712 signing + order builder + client
-│   │   ├── signing.py       #   EIP-712 pipeline (ported, vector-pinned)
-│   │   ├── order_builder.py #   reduce-only close orders + simulate()
-│   │   ├── execution_client.py  # LOCAL-ONLY live submission
-│   │   └── constants.py     #   networks, enums, signing field order
+│   ├── smart_money.py       # Live top-trader consensus + open-positions fetch
+│   ├── risk.py              # 2D anti-pattern engine (powers Trade Check)
+│   ├── qna.py               # Full AI diagnostic engine (Claude tool use)
 │   ├── briefing.py          # Legacy briefing (kept for back-compat)
 │   └── config.py            # Settings, API keys via env vars
-├── scripts/
-│   ├── alert_bot.py         # Wave 3: local Discord divergence-alert poller
-│   └── edgework_exec.py     # Wave 3: local reduce-only execution companion
-├── tests/                   # slicer, exchange, qna, alerts, risk (39 passing)
+├── tests/                   # slicer, qna, risk, + module tests (39 passing)
 ├── data/                    # Local parquet/CSV cache (gitignored)
 ├── docs/                    # Architecture notes, API usage plan
 ├── streamlit_app.py         # Live app entry point

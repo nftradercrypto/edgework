@@ -4,39 +4,25 @@ All notable changes to Edgework will be documented here.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] — Wave 3 (final): from analytics to action
+## [Unreleased] — Wave 3: the pre-trade verdict
 
-### Added — Execution layer (`src/edgework/exchange/`)
-- EIP-712 signing pipeline for SoDEX (`signing.py`), ported bit-for-bit from a
-  production trading client and pinned against a known-good signature vector.
-- `order_builder.py`: turns a position + reason into a **reduce-only** close
-  order. `simulate()` signs with an ephemeral throwaway key and sends nothing —
-  what the hosted app uses, zero custody risk.
-- `execution_client.py`: LOCAL-ONLY live submission to SoDEX `/exchange`.
-- In-app "Close · SIM" buttons render the full signed order (digest, signature,
-  exact POST body) per open position.
-- `scripts/edgework_exec.py`: local companion CLI for real reduce-only closes
-  (dry-run by default; `--live` requires a typed `YES`). Keys never leave the
-  user's machine; the hosted app is simulation-only.
+### Added — Trade Check (the headline)
+- Pick a **symbol + side** and get an instant, read-only verdict on whether to
+  take the trade, combining three signals: your own history on that exact
+  setup, the live smart-money book (aligned / contrarian / no bias), and your
+  edge in the current BTC regime. Colour-coded from "🛑 strong skip" to
+  "✅ green light", recomputed live when you flip long/short.
+- `src/edgework/smart_money.py`: pure, importable top-trader consensus + open-
+  positions fetch, shared by Trade Check and the Smart Money Watch (one cached
+  fetch per 15 min).
+- `src/edgework/risk.py`: self-contained 2D anti-pattern engine that powers the
+  history/risk side of the verdict.
 
-### Added — Smart Money Divergence alerts + risk-control hooks (Discord)
-- `smart_money.py`: pure, importable consensus + open-positions fetch shared by
-  the app and the poller.
-- `alerts.py`: divergence detection, Discord embed formatting, webhook send, and
-  a dedupe state so the same open position never double-pings.
-- `risk.py`: self-contained 2D anti-pattern engine + a matcher that flags an
-  open position against the trader's own losing setups. Powers the
-  **risk-control hook** — the poller also alerts when you open a position that
-  matches a historically losing 2D pattern (e.g. `SYMBOL LIT-USD + SIZE Q4`),
-  degrading gracefully on dimensions it can't evaluate at open time.
-- `scripts/alert_bot.py`: local read-only poller (`--test` / `--once` / loop /
-  `--no-risk`). Fires both divergence and risk-pattern alerts.
-- In-app webhook wizard: test the webhook + copy the command to run the watcher.
-
-### Added — Contrarian track record (the evidence behind the alert)
+### Added — Contrarian track record
 - Reconstructs the smart-money book at each past entry from top traders'
   position history and classifies the trader's trades aligned / contrarian /
-  no-signal, with winrate + expectancy per bucket.
+  no-signal, with winrate + expectancy per bucket — the evidence behind the
+  Trade Check verdict.
 
 ### Changed — Statistical rigor
 - Verdict confidence is now a real **bootstrap probability** (2,000 resamples)
@@ -47,23 +33,21 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - AI tool filters fold dash/case variants ("5-30m" now matches the en-dash
   bucket label) so the diagnostic never reasons over silently-empty filters.
 
-### Added — UX & clarity
-- TL;DR card: deterministic 10-second read (biggest leak / best edge / fees).
-- Numbered anchor navigation across the long page.
-- One-click "try a top trader's wallet" demo.
-- Tooltips on every technical term, including how the bootstrap confidence works.
-- Progressive disclosure (waterfall + risk filters collapsed by default).
-- Fees decomposition (gross vs fees vs net), profit factor, max drawdown.
-- Tilt detector: live loss-streak banner citing the trader's own historical
-  expectancy for that streak bucket.
-- Low-sample (n<15) badges on conditional-performance cards.
-- Mobile pass; fixed a cold-load bug where bookmarked `?w=` links rendered empty.
-
-### Dependencies
-- Added `eth-keys`, `eth-utils`, `eth-hash[pycryptodome]` (no `web3`).
+### Added — UX, clarity & visual redesign
+- Brand logo lockup in the sidebar + topbar; two-option sidebar (wallet / demo)
+  with card-style choices; elegant above-the-fold landing with a "what you'll
+  get" feature strip; branded favicon; consistent buttons.
+- **Use demo data** now loads a real, active top SoDEX trader (real symbols,
+  working Trade Check) instead of synthetic data.
+- TL;DR card (biggest leak / best edge / fees); numbered anchor navigation;
+  tooltips on every technical term; progressive disclosure (waterfall + risk
+  filters collapsed by default).
+- Fees decomposition (gross vs fees vs net), profit factor, max drawdown; tilt
+  detector; low-sample (n<15) badges; mobile pass; fixed a cold-load bug where
+  bookmarked `?w=` links rendered empty.
 
 ### Tests
-- `test_exchange.py`, `test_qna_filters.py`, `test_alerts.py` added. 33 passing.
+- `test_qna_filters.py`, `test_risk.py` and module tests. 39 passing.
 
 ## [0.2.0] - Wave 2 (1st place) — Leaderboard-benchmarked alpha
 
