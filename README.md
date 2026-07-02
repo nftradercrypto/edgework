@@ -6,7 +6,7 @@
 > preserved at tags
 > [`wave-1-final`](https://github.com/nftradercrypto/edgework/releases/tag/wave-1-final)
 > and [`wave-2-final`](https://github.com/nftradercrypto/edgework/releases/tag/wave-2-final).
-> The current `main` is **Wave 3**.
+> The current `main` is **Wave 3 — the final wave**.
 
 Edgework is a performance intelligence tool for serious traders on SoDEX.
 It turns your raw order history into the one thing PNL doesn't show:
