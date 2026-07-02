@@ -798,6 +798,54 @@ st.markdown(
     }}
     .ew-sim-note strong {{ color: {TEXT}; }}
 
+    /* ── Trade Check hero banner (Wave 3 headline) ── */
+    .ew-tc-banner {{
+        border: 1px solid {ACCENT};
+        border-left: 4px solid {ACCENT};
+        border-radius: 11px;
+        background:
+            radial-gradient(120% 160% at 0% 0%, rgba(245,132,31,0.14), transparent 55%),
+            linear-gradient(180deg, {SURFACE}, {BG});
+        padding: 18px 22px 17px;
+        margin: 34px 0 6px;
+        box-shadow: 0 0 34px rgba(245,132,31,0.10);
+    }}
+    .ew-tc-banner-top {{
+        display: flex; align-items: center; gap: 13px; flex-wrap: wrap;
+    }}
+    .ew-tc-banner .title {{
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 23px;
+        color: {TEXT};
+        letter-spacing: -0.01em;
+        line-height: 1;
+    }}
+    .ew-tc-banner .badge {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.18em;
+        font-weight: 700;
+        color: #0a0a0a;
+        background: {ACCENT};
+        padding: 4px 9px;
+        border-radius: 5px;
+        box-shadow: 0 0 0 0 {ACCENT_GLOW};
+        animation: ew-tcpulse 2.6s ease-in-out infinite;
+    }}
+    @keyframes ew-tcpulse {{
+        0%, 100% {{ box-shadow: 0 0 0 0 rgba(245,132,31,0.45); }}
+        50%      {{ box-shadow: 0 0 0 7px rgba(245,132,31,0); }}
+    }}
+    .ew-tc-banner .sub {{
+        font-family: 'Outfit', sans-serif;
+        font-size: 13.5px;
+        color: {MUTED};
+        line-height: 1.5;
+        margin-top: 9px;
+        max-width: 820px;
+    }}
+
     /* ── Trade Check (in-browser pre-trade verdict) ── */
     .ew-tc {{
         border: 1px solid {BORDER_HI};
@@ -2446,8 +2494,8 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "nav_diagnostic":  {"EN": "AI diagnostic","PT": "Diagnóstico IA"},
 
     # Trade Check (Wave 3 — in-browser pre-trade verdict)
-    "tc_title":   {"EN": "Trade Check · before you take it",
-                   "PT": "Trade Check · antes de entrar"},
+    "tc_title":   {"EN": "Trade Check", "PT": "Trade Check"},
+    "tc_badge":   {"EN": "WAVE 3 · NEW", "PT": "WAVE 3 · NOVO"},
     "tc_sub":     {
         "EN": "Thinking about a trade? Check it against your own history and the live smart-money book — instantly, in your browser. No wallet to connect, nothing to install.",
         "PT": "Pensando em uma trade? Cheque contra o seu próprio histórico e o book do smart money ao vivo — na hora, no navegador. Sem conectar carteira, sem instalar nada.",
@@ -4033,9 +4081,12 @@ def _render_trade_check(raw_trades_df: pd.DataFrame, smart_money: dict,
         return f"{sign}${abs(x):,.2f}"
 
     st.markdown(
-        '<div class="ew-section">'
-        f'<div class="ew-section-title ew-anchor" id="sec-tradecheck">{_t("tc_title")}</div>'
-        f'<div class="ew-section-sub">{_t("tc_sub")}</div>'
+        '<div class="ew-tc-banner ew-anchor" id="sec-tradecheck">'
+        '<div class="ew-tc-banner-top">'
+        f'<span class="title">⚡ {_t("tc_title")}</span>'
+        f'<span class="badge">{_t("tc_badge")}</span>'
+        '</div>'
+        f'<div class="sub">{_t("tc_sub")}</div>'
         '</div>',
         unsafe_allow_html=True,
     )
