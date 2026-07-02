@@ -2636,7 +2636,7 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "v_arrow_advice":     {"EN": "Avoid {worst} {dim_word} — your edge is in {best}.",
                            "PT": "Evite {worst} {dim_word} — seu edge está em {best}."},
     "v_confidence":       {"EN": "Confidence · {conf}%", "PT": "Confiança · {conf}%"},
-    "v_net_pnl":          {"EN": "Net PNL · 90d",      "PT": "PNL Líquido · 90d"},
+    "v_net_pnl":          {"EN": "Net PNL · 365d",      "PT": "PNL Líquido · 365d"},
     "v_edge_pnl":         {"EN": "Edge PNL · {best}",  "PT": "PNL do Edge · {best}"},
     "v_bleed_pnl":        {"EN": "Bleed PNL · {worst}","PT": "PNL do Ralo · {worst}"},
     "v_recovered":        {"EN": "Recovered if avoided","PT": "Recuperado se evitado"},
@@ -2665,7 +2665,7 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "c_profit_hour":      {"EN": "Profit hour",        "PT": "Hora lucrativa"},
     "c_loss_hour":        {"EN": "Loss hour",          "PT": "Hora perdedora"},
     "c_edge_bleed":       {"EN": "Edge / bleed",       "PT": "Edge / ralo"},
-    "c_pnl_usd_90d":      {"EN": "PNL · USD · 90D",    "PT": "PNL · USD · 90D"},
+    "c_pnl_usd_90d":      {"EN": "PNL · USD · 365D",    "PT": "PNL · USD · 365D"},
     "c_narrative":        {"EN": "You're most active at <strong>{busy_hour:02d}:00 UTC</strong> ({busy_n} trades), but most of your PNL is being made — and lost — in <strong>different hours</strong> entirely.",
                            "PT": "Você opera mais às <strong>{busy_hour:02d}:00 UTC</strong> ({busy_n} trades), mas a maior parte do seu PNL está sendo feito — e perdido — em <strong>horários diferentes</strong>."},
 
@@ -2745,7 +2745,7 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
 
     # Topbar
     "tb_crumb":         {"EN": "autopsy",       "PT": "autópsia"},
-    "tb_window":        {"EN": "WINDOW · 90D",  "PT": "JANELA · 90D"},
+    "tb_window":        {"EN": "WINDOW · 365D",  "PT": "JANELA · 365D"},
     "tb_live":          {"EN": "LIVE",          "PT": "AO VIVO"},
 
     # Filter status row
@@ -5386,14 +5386,14 @@ def _render_confrontation(slices_dict) -> None:
         if _pt:
             belief = (
                 f"Você passa a maior parte do tempo de tela às <span class='em'>{most_active_h:02d}:00 UTC</span> — "
-                f"<span class='em'>{n_active} trades</span> em 90 dias.<br><br>"
+                f"<span class='em'>{n_active} trades</span> em 365 dias.<br><br>"
                 f"A fita parece rápida. Você se sente afiado.<br><br>"
                 f"Essa hora te custa <span class='neg'>{_money_signed(active_pnl)}</span>."
             )
         else:
             belief = (
                 f"You spend most of your screen-time at <span class='em'>{most_active_h:02d}:00 UTC</span> — "
-                f"<span class='em'>{n_active} trades</span> in 90 days.<br><br>"
+                f"<span class='em'>{n_active} trades</span> in 365 days.<br><br>"
                 f"The tape feels fast. You feel sharp.<br><br>"
                 f"That hour costs you <span class='neg'>{_money_signed(active_pnl)}</span>."
             )
