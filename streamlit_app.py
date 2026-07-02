@@ -70,9 +70,19 @@ from edgework.sosovalue_client import SoSoValueClient  # noqa: E402
 # Page config + brand palette
 # --------------------------------------------------------------------------- #
 
+# Branded favicon: the orange bar from the logo, as an inline SVG data URI.
+_FAVICON = (
+    "data:image/svg+xml,"
+    "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
+    "%3Crect width='32' height='32' rx='6' fill='%230a0a0a'/%3E"
+    "%3Crect x='9' y='6' width='6' height='20' rx='3' fill='%23f5841f'/%3E"
+    "%3Crect x='18' y='6' width='5' height='20' rx='2.5' fill='%23f5841f' opacity='0.35'/%3E"
+    "%3C/svg%3E"
+)
+
 st.set_page_config(
     page_title="Edgework — trade analytics for pro traders",
-    page_icon="▍",
+    page_icon=_FAVICON,
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -473,6 +483,38 @@ st.markdown(
         border-color: {ACCENT};
         background: {ACCENT_DIM};
         box-shadow: inset 3px 0 0 {ACCENT};
+    }}
+
+    /* ── Consistent buttons (brand) ── */
+    .stButton > button {{
+        font-family: 'Space Mono', monospace !important;
+        letter-spacing: 0.09em !important;
+        text-transform: uppercase;
+        font-size: 12px !important;
+        border-radius: 8px !important;
+        transition: transform .12s ease, background .15s ease,
+                    border-color .15s ease, color .15s ease !important;
+    }}
+    .stButton > button[kind="primary"] {{
+        background: {ACCENT} !important;
+        color: #0a0a0a !important;
+        border: 1px solid {ACCENT} !important;
+        font-weight: 700 !important;
+    }}
+    .stButton > button[kind="primary"]:hover {{
+        background: #ffa64d !important;
+        border-color: #ffa64d !important;
+        transform: translateY(-1px);
+    }}
+    .stButton > button[kind="secondary"] {{
+        background: transparent !important;
+        border: 1px solid {BORDER_HI} !important;
+        color: {MUTED} !important;
+    }}
+    .stButton > button[kind="secondary"]:hover {{
+        border-color: {ACCENT} !important;
+        color: {ACCENT} !important;
+        transform: translateY(-1px);
     }}
 
     /* ── Headline ── */
@@ -2446,8 +2488,10 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     # One-click demo
     "demo_btn":      {"EN": "🎲 No wallet? Try a top trader's →",
                       "PT": "🎲 Sem carteira? Teste com um top trader →"},
-    "demo_loading":  {"EN": "Finding an active top trader…",
-                      "PT": "Buscando um top trader ativo…"},
+    "demo_loading":  {"EN": "Loading a live top-trader demo…",
+                      "PT": "Carregando demo com um top trader ao vivo…"},
+    "demo_showing":  {"EN": "Live demo · top SoDEX trader",
+                      "PT": "Demo ao vivo · top trader da SoDEX"},
     "demo_failed":   {"EN": "Couldn't fetch the leaderboard right now — paste a wallet instead.",
                       "PT": "Não consegui buscar o leaderboard agora — cole uma carteira manualmente."},
 
@@ -2987,6 +3031,49 @@ if "wallet_cache" not in st.session_state:
     st.session_state.wallet_cache = {}
 
 
+@st.cache_data(ttl=1800, show_spinner=False)
+def _fetch_demo_trader() -> tuple:
+    """Pick an active + profitable top SoDEX trader and load their REAL
+    history, so the demo shows the tool on real data (real symbols, working
+    Trade Check + Smart Money comparison) rather than synthetic noise.
+
+    Returns (address, trades_df) or (None, None) if the API is unavailable.
+    """
+    try:
+        from edgework.sodex_client import SodexClient
+
+        with SodexClient(
+            user_address="0x0000000000000000000000000000000000000000"
+        ) as dc:
+            lb = dc.get_leaderboard(
+                window_type="30d", sort_by="volume",
+                sort_order="desc", page=1, page_size=10,
+            )
+        addr = None
+        for it in (lb.get("items", []) or []):
+            if it.get("wallet_address") and float(it.get("pnl_usd", 0) or 0) > 0:
+                addr = it["wallet_address"]
+                break
+        if addr is None:
+            for it in (lb.get("items", []) or []):
+                if it.get("wallet_address"):
+                    addr = it["wallet_address"]
+                    break
+        if not addr:
+            return None, None
+        end_ms = int(pd.Timestamp.now("UTC").value // 1_000_000)
+        start_ms = end_ms - 365 * 86_400_000
+        with SodexClient(user_address=addr) as c:
+            positions = c.get_position_history_paginated(
+                start_ms=start_ms, end_ms=end_ms, page_limit=500, max_pages=40,
+            )
+        if not positions:
+            return None, None
+        return addr, slicer.normalize_orders(positions)
+    except Exception:  # noqa: BLE001 — fall back to synthetic demo
+        return None, None
+
+
 if source == "From wallet address":
     col_input, col_btn = st.columns([4, 1])
     with col_input:
@@ -2997,7 +3084,9 @@ if source == "From wallet address":
             label_visibility="collapsed",
         )
     with col_btn:
-        fetch_clicked = st.button(_t("wallet_fetch"), use_container_width=True)
+        fetch_clicked = st.button(
+            _t("wallet_fetch"), use_container_width=True, type="primary"
+        )
 
     # Auto-trigger fetch when URL pre-loaded a wallet we don't have cached yet.
     # The seed flag is consumed on first use so reloads don't re-fetch.
@@ -3093,7 +3182,20 @@ elif source == "Upload file":
         except Exception as e:  # noqa: BLE001
             st.sidebar.error(f"Could not parse file: {e}")
 
-else:  # Use demo data
+elif source == "Use demo data":
+    # Load a real, active top trader so the demo shows the tool at its best.
+    with st.spinner(_t("demo_loading")):
+        _demo_addr, _demo_df = _fetch_demo_trader()
+    if _demo_df is not None and not _demo_df.empty:
+        trades = _demo_df
+        st.session_state["active_address"] = _demo_addr
+        st.caption(
+            f"{_t('demo_showing')} · **`{_demo_addr}`** · "
+            f"{_t('showing_positions', n=f'{len(trades):,}')}"
+        )
+
+if trades is None and source == "Use demo data":
+    # Synthetic fallback — only if the live top-trader fetch was unavailable.
     rng = np.random.default_rng(42)
     n = 200
     now = pd.Timestamp.now(tz="UTC")
