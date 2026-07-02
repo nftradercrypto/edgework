@@ -16,6 +16,11 @@ plotly>=5.22
 httpx>=0.27
 python-dotenv>=1.0
 
+# Pillow ≥ 10.1 → ImageFont.load_default(size); used to render the
+# downloadable Edge Card PNG. (Streamlit already pulls it in transitively —
+# pinned explicitly since we import it directly.)
+Pillow>=10.1
+
 # Anthropic SDK ≥ 0.40 → prompt-cache cache_control via list-typed `system`
 # blocks + the claude-sonnet-4-6 model id used in qna.py / briefing.py.
 anthropic>=0.40
