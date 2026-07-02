@@ -105,6 +105,21 @@ LOGO_SVG = (
 )
 
 
+def _logo_html(size: str = "lg") -> str:
+    """Edgework brand lockup: orange bar + 'Edgework' + 'Trade Analytics'.
+
+    size="lg" for the sidebar / landing, "sm" for the compact topbar.
+    """
+    return (
+        f'<span class="ew-logo {size}">'
+        '<span class="bar"></span>'
+        '<span class="wordmark">'
+        '<span class="name">Edgework</span>'
+        '<span class="tag">Trade Analytics</span>'
+        '</span></span>'
+    )
+
+
 # --------------------------------------------------------------------------- #
 # CSS
 # --------------------------------------------------------------------------- #
@@ -355,9 +370,9 @@ st.markdown(
         letter-spacing: 0.16em;
         color: {MUTED};
         text-transform: uppercase;
-        padding-bottom: 16px;
+        padding-bottom: 14px;
         border-bottom: 1px solid {BORDER};
-        margin-bottom: 32px;
+        margin-bottom: 20px;
     }}
     .ew-brand {{
         display: inline-flex;
@@ -385,13 +400,88 @@ st.markdown(
         animation: ew-pulse 2.2s ease-in-out infinite;
     }}
 
+    /* ── Brand logo lockup (orange bar + Edgework + Trade Analytics) ── */
+    .ew-logo {{
+        display: inline-flex;
+        align-items: center;
+        gap: 11px;
+        text-decoration: none;
+        white-space: nowrap;
+    }}
+    .ew-logo .bar {{
+        display: inline-block;
+        width: 5px;
+        border-radius: 3px;
+        background: linear-gradient(180deg, {ACCENT}, #b0560d);
+        box-shadow: 0 0 14px {ACCENT_GLOW};
+        flex: none;
+    }}
+    .ew-logo .wordmark {{ display: inline-flex; flex-direction: column; justify-content: center; }}
+    .ew-logo .name {{
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        color: {TEXT};
+        line-height: 1;
+        letter-spacing: -0.02em;
+        text-transform: none;
+    }}
+    .ew-logo .tag {{
+        display: block;
+        font-family: 'Space Mono', monospace;
+        color: {MUTED};
+        text-transform: uppercase;
+        margin-top: 5px;
+    }}
+    .ew-logo.lg .bar  {{ height: 42px; }}
+    .ew-logo.lg .name {{ font-size: 28px; }}
+    .ew-logo.lg .tag  {{ font-size: 9px; letter-spacing: 0.34em; }}
+    .ew-logo.sm .bar  {{ height: 24px; width: 4px; }}
+    .ew-logo.sm .name {{ font-size: 17px; letter-spacing: 0.01em; }}
+    .ew-logo.sm .tag  {{ display: none; }}
+
+    /* ── Sidebar polish ── */
+    section[data-testid="stSidebar"] {{
+        background: linear-gradient(180deg, {SURFACE}, {BG});
+        border-right: 1px solid {BORDER};
+    }}
+    .ew-sb-logo {{ padding: 6px 0 4px; }}
+    .ew-sb-eyebrow {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: {DIM};
+        margin: 22px 0 10px;
+    }}
+    /* Radio → friendly card rows */
+    section[data-testid="stSidebar"] div[role="radiogroup"] {{ gap: 7px; }}
+    section[data-testid="stSidebar"] div[role="radiogroup"] > label {{
+        border: 1px solid {BORDER};
+        border-radius: 9px;
+        padding: 11px 13px;
+        margin: 0 0 7px 0;
+        background: {SURFACE};
+        transition: border-color .15s, background .15s, transform .1s;
+        cursor: pointer;
+    }}
+    section[data-testid="stSidebar"] div[role="radiogroup"] > label:hover {{
+        border-color: {ACCENT};
+        background: {ACCENT_DIM};
+        transform: translateX(2px);
+    }}
+    section[data-testid="stSidebar"] div[role="radiogroup"] > label:has(input:checked) {{
+        border-color: {ACCENT};
+        background: {ACCENT_DIM};
+        box-shadow: inset 3px 0 0 {ACCENT};
+    }}
+
     /* ── Headline ── */
     .ew-headline {{
-        font-size: 46px;
+        font-size: 34px;
         font-weight: 700;
-        letter-spacing: -0.035em;
-        line-height: 1.02;
-        margin: 0 0 14px 0;
+        letter-spacing: -0.03em;
+        line-height: 1.04;
+        margin: 0 0 9px 0;
         color: {TEXT};
         font-family: 'Outfit', sans-serif;
     }}
@@ -404,8 +494,8 @@ st.markdown(
     .ew-sub {{
         color: {MUTED};
         max-width: 720px;
-        font-size: 16px;
-        line-height: 1.65;
+        font-size: 14px;
+        line-height: 1.55;
         font-weight: 400;
         font-family: 'Outfit', sans-serif;
     }}
@@ -1358,6 +1448,83 @@ st.markdown(
         font-weight: 400;
     }}
 
+    /* ── Landing (elegant empty state) ── */
+    .ew-land-eyebrow {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: {DIM};
+        margin: 22px 0 12px;
+        display: flex; align-items: center; gap: 12px;
+    }}
+    .ew-land-eyebrow::before {{
+        content: ""; width: 26px; height: 1px; background: {ACCENT}; opacity: 0.7;
+    }}
+    .ew-feat-grid {{
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+    }}
+    .ew-feat-card {{
+        position: relative;
+        border: 1px solid {BORDER};
+        background: linear-gradient(160deg, {SURFACE}, {BG} 70%);
+        padding: 15px 17px 16px;
+        overflow: hidden;
+        transition: border-color .2s ease, transform .18s ease, box-shadow .2s ease;
+    }}
+    .ew-feat-card::before {{
+        content: "";
+        position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+        background: linear-gradient(90deg, {ACCENT}, transparent 70%);
+        opacity: 0; transition: opacity .2s ease;
+    }}
+    .ew-feat-card:hover {{
+        border-color: {BORDER_HI};
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+    }}
+    .ew-feat-card:hover::before {{ opacity: 1; }}
+    .ew-feat-card .n {{
+        font-family: 'Space Mono', monospace;
+        font-size: 10px;
+        letter-spacing: 0.2em;
+        color: {ACCENT};
+        font-weight: 700;
+    }}
+    .ew-feat-card .ico {{ font-size: 18px; margin: 9px 0 8px; display: block; }}
+    .ew-feat-card .h {{
+        font-family: 'Outfit', sans-serif;
+        font-weight: 700;
+        font-size: 15px;
+        color: {TEXT};
+        margin-bottom: 5px;
+        letter-spacing: -0.01em;
+    }}
+    .ew-feat-card .d {{
+        font-family: 'Outfit', sans-serif;
+        font-size: 12px;
+        color: {MUTED};
+        line-height: 1.45;
+    }}
+    .ew-trust {{
+        display: flex; flex-wrap: wrap; gap: 8px 22px;
+        margin-top: 14px;
+        font-family: 'Space Mono', monospace;
+        font-size: 10.5px;
+        letter-spacing: 0.06em;
+        color: {DIM};
+    }}
+    .ew-trust span {{ display: inline-flex; align-items: center; gap: 7px; }}
+    .ew-trust .dot {{
+        width: 5px; height: 5px; border-radius: 50%; background: {GREEN};
+        display: inline-block;
+    }}
+    @media (max-width: 740px) {{
+        .ew-feat-grid {{ grid-template-columns: 1fr !important; }}
+    }}
+
     /* ── Bottombar ── */
     .ew-bottombar {{
         display: flex;
@@ -2205,6 +2372,26 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "tldr_fees":     {"EN": "Fees paid",     "PT": "Taxas pagas"},
     "tldr_net":      {"EN": "Net PNL",       "PT": "PNL líquido"},
 
+    # Landing (elegant empty state)
+    "land_eyebrow":  {"EN": "What you'll get", "PT": "O que você vai ver"},
+    "land_f1_h":     {"EN": "Trade Check",       "PT": "Trade Check"},
+    "land_f1_d":     {"EN": "Check any trade against your own history and the live smart-money book before you take it.",
+                      "PT": "Cheque qualquer trade contra o seu histórico e o book do smart money antes de entrar."},
+    "land_f2_h":     {"EN": "Smart Money Watch",  "PT": "Smart Money Watch"},
+    "land_f2_d":     {"EN": "See where the top active + profitable SoDEX traders are positioned right now.",
+                      "PT": "Veja onde os top traders ativos e lucrativos da SoDEX estão posicionados agora."},
+    "land_f3_h":     {"EN": "AI Diagnostic",      "PT": "Diagnóstico IA"},
+    "land_f3_d":     {"EN": "A full autopsy of your trading — the 5 biggest problems, each quantified in dollars.",
+                      "PT": "Uma autópsia completa do seu trading — os 5 maiores problemas, cada um quantificado em dólares."},
+    "land_t1":       {"EN": "Read-only",          "PT": "Somente leitura"},
+    "land_t2":       {"EN": "Public API · no login", "PT": "API pública · sem login"},
+    "land_t3":       {"EN": "No private key, ever", "PT": "Nunca pede chave privada"},
+
+    # Sidebar
+    "sb_data_source": {"EN": "Data source", "PT": "Fonte de dados"},
+    "sb_footnote":    {"EN": "Peer benchmark vs top traders is fetched automatically — no manual input needed.",
+                       "PT": "O benchmark vs top traders é buscado automaticamente — sem input manual."},
+
     # Anchor nav
     "nav_tradecheck":  {"EN": "Trade Check",  "PT": "Trade Check"},
     "nav_verdict":     {"EN": "Verdict",      "PT": "Veredito"},
@@ -2612,8 +2799,7 @@ st.markdown(
 
     <div class="ew-topbar">
         <span class="ew-brand">
-            {LOGO_SVG}
-            <span>EDGEWORK</span>
+            {_logo_html("sm")}
             <span class="ew-crumb">
                 <span class="ew-topbar-sep">/</span>
                 <span class="v">{_t("tb_crumb")}</span>
@@ -2632,8 +2818,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-
-st.divider()
 
 
 # --------------------------------------------------------------------------- #
@@ -2763,39 +2947,33 @@ _seed_state_from_url()
 
 
 with st.sidebar:
-    st.header("Trade history")
+    st.markdown(
+        f'<div class="ew-sb-logo">{_logo_html("lg")}</div>'
+        f'<div class="ew-sb-eyebrow">{_t("sb_data_source")}</div>',
+        unsafe_allow_html=True,
+    )
 
     parquet_path = Path("data/history.parquet")
     has_cached = parquet_path.exists()
 
-    options = ["From wallet address"]
-    if has_cached:
-        options.append("Cached file (data/history.parquet)")
-    options += ["Upload file", "Use demo data"]
-
+    # Two clean choices only: analyze a real wallet, or explore with demo data.
     source = st.radio(
         "Data source",
-        options,
+        ["From wallet address", "Use demo data"],
         index=0,
+        label_visibility="collapsed",
         help=(
             "Paste any SoDEX wallet address to pull its closed positions live "
             "from the public API. No login or signature required."
         ),
     )
 
-    if has_cached:
-        modtime = pd.Timestamp(parquet_path.stat().st_mtime, unit="s", tz="UTC")
-        st.caption(f"Cached: {modtime.strftime('%Y-%m-%d %H:%M UTC')}")
-
     st.markdown("---")
     st.caption(
-        "Wave 2 · "
-        "[GitHub](https://github.com/nftradercrypto/edgework)"
+        "[GitHub ↗](https://github.com/nftradercrypto/edgework) · "
+        "built by [@nftradercrypto](https://x.com/nftradercrypto)"
     )
-    st.caption(
-        "Peer benchmark vs top traders is fetched automatically — "
-        "no manual input needed."
-    )
+    st.caption(_t("sb_footnote"))
 
 
 # --------------------------------------------------------------------------- #
@@ -2810,61 +2988,16 @@ if "wallet_cache" not in st.session_state:
 
 
 if source == "From wallet address":
-    st.markdown(
-        f"""
-        <div class="ew-section">
-            <div class="ew-section-title">{_t("wallet_section_title")}</div>
-            <div class="ew-section-sub">{_t("wallet_section_sub")}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
     col_input, col_btn = st.columns([4, 1])
     with col_input:
         address = st.text_input(
             "Wallet address",
             value=st.session_state.get("active_address", ""),
-            placeholder="0x…",
+            placeholder="0x…  paste any SoDEX wallet — read-only, no login",
             label_visibility="collapsed",
         )
     with col_btn:
         fetch_clicked = st.button(_t("wallet_fetch"), use_container_width=True)
-
-    # One-click demo: pull an active top trader from the leaderboard and load
-    # their wallet through the exact same fetch pipeline. Zero-friction first
-    # contact for visitors without a SoDEX wallet of their own.
-    _demo_clicked = st.button(_t("demo_btn"), key="demo_top_trader_btn")
-    if _demo_clicked:
-        try:
-            from edgework.sodex_client import SodexClient
-
-            with st.spinner(_t("demo_loading")):
-                with SodexClient(
-                    user_address="0x0000000000000000000000000000000000000000"
-                ) as _dc:
-                    _lb = _dc.get_leaderboard(
-                        window_type="30d", sort_by="volume",
-                        sort_order="desc", page=1, page_size=10,
-                    )
-            _demo_addr = None
-            for _it in (_lb.get("items", []) or []):
-                # Prefer active traders that are also profitable in window.
-                if _it.get("wallet_address") and float(_it.get("pnl_usd", 0) or 0) > 0:
-                    _demo_addr = _it["wallet_address"]
-                    break
-            if _demo_addr is None:  # fall back to plain top volume
-                for _it in (_lb.get("items", []) or []):
-                    if _it.get("wallet_address"):
-                        _demo_addr = _it["wallet_address"]
-                        break
-            if _demo_addr:
-                st.session_state["url_seed_wallet"] = _demo_addr
-                st.rerun()
-            else:
-                st.warning(_t("demo_failed"))
-        except Exception:  # noqa: BLE001
-            st.warning(_t("demo_failed"))
 
     # Auto-trigger fetch when URL pre-loaded a wallet we don't have cached yet.
     # The seed flag is consumed on first use so reloads don't re-fetch.
@@ -2998,30 +3131,33 @@ else:  # Use demo data
 if trades is None:
     if not raw_orders:
         if source == "From wallet address":
+            _feat = (
+                ("01", "⚡", _t("land_f1_h"), _t("land_f1_d")),
+                ("02", "🎯", _t("land_f2_h"), _t("land_f2_d")),
+                ("03", "🔬", _t("land_f3_h"), _t("land_f3_d")),
+            )
+            _cards = "".join(
+                f'<div class="ew-feat-card"><span class="n">{n}</span>'
+                f'<span class="ico">{ico}</span>'
+                f'<div class="h">{h}</div><div class="d">{d}</div></div>'
+                for n, ico, h, d in _feat
+            )
             st.markdown(
-                """
-                <div class="ew-empty">
-                    <div class="ew-empty-icon">[ 0x ]</div>
-                    <div class="ew-empty-title">Paste a wallet address to begin</div>
-                    <div class="ew-empty-sub">
-                        Enter any SoDEX trader's wallet above and click <strong>Fetch</strong>.<br>
-                        No login or private key required — public API only.
-                    </div>
-                </div>
-                """,
+                f'<div class="ew-land-eyebrow">{_t("land_eyebrow")}</div>'
+                f'<div class="ew-feat-grid">{_cards}</div>'
+                '<div class="ew-trust">'
+                f'<span><span class="dot"></span>{_t("land_t1")}</span>'
+                f'<span><span class="dot"></span>{_t("land_t2")}</span>'
+                f'<span><span class="dot"></span>{_t("land_t3")}</span>'
+                '</div>',
                 unsafe_allow_html=True,
             )
         else:
             st.markdown(
-                """
+                f"""
                 <div class="ew-empty">
                     <div class="ew-empty-icon">[ — ]</div>
-                    <div class="ew-empty-title">Select a data source to begin</div>
-                    <div class="ew-empty-sub">
-                        Choose from the sidebar. If you've run
-                        <code>python scripts/pull_history.py</code>, the cached file
-                        option will appear automatically.
-                    </div>
+                    <div class="ew-empty-title">{_t("wallet_section_title")}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
