@@ -975,6 +975,10 @@ st.markdown(
         font-family: 'Outfit', sans-serif; font-size: 13px;
         color: {MUTED}; line-height: 1.45; max-width: 560px;
     }}
+    .ew-edge-meta .desc .lowsamp {{
+        font-family: 'Space Mono', monospace; font-size: 11px;
+        color: {ACCENT}; white-space: nowrap;
+    }}
     .ew-edge-stats {{
         display: flex; flex-wrap: wrap; gap: 10px 30px; margin-top: 14px;
     }}
@@ -2588,6 +2592,8 @@ _TRANSLATIONS: dict[str, dict[str, str]] = {
     "eg_download":    {"EN": "⬇ Download Edge Card (share on X)",
                        "PT": "⬇ Baixar Edge Card (compartilhar no X)"},
     "eg_verified":    {"EN": "VERIFIED", "PT": "VERIFICADO"},
+    "eg_low_sample":  {"EN": "capped: only {n} trades so far",
+                       "PT": "limitado: só {n} trades até agora"},
     "eg_sub_hit":     {"EN": "Hit rate",   "PT": "Taxa de acerto"},
     "eg_sub_netp":    {"EN": "Net profit", "PT": "Lucro líquido"},
     "eg_sub_netn":    {"EN": "Net loss",   "PT": "Prejuízo líquido"},
@@ -4100,9 +4106,16 @@ def _compute_edge_score(ov, slices_dict: dict, trades_df: pd.DataFrame):
     else:
         edge_q = 0.2 * wr * 25.0
 
-    score = int(round(max(0.0, min(100.0, pf_score + cons_score + edge_q))))
+    raw = pf_score + cons_score + edge_q
+    # Sample-size credibility cap — a couple of lucky trades must not read as
+    # an "elite edge". Full range only unlocks around ~50 closed trades.
+    cred_cap = min(100.0, 30.0 + int(ov.n_trades) * 1.4)
+    capped = min(raw, cred_cap)
+    score = int(round(max(0.0, min(100.0, capped))))
     return score, {"pf": pf, "consistency": consistency, "wr": wr,
-                   "expectancy": float(ov.expectancy)}
+                   "expectancy": float(ov.expectancy),
+                   "n": int(ov.n_trades),
+                   "low_sample": raw > cred_cap + 2}
 
 
 def _edge_grade(score: int) -> tuple[str, str, str]:
@@ -4299,7 +4312,10 @@ def _render_edge_card(trades_df: pd.DataFrame, slices_dict: dict, ov,
         '<div class="ew-edge-meta">'
         f'<div class="eyebrow">{_t("eg_eyebrow")}</div>'
         f'<div class="grade" style="color:{color}">{grade}</div>'
-        f'<div class="desc">{_t(d_key)}</div>'
+        f'<div class="desc">{_t(d_key)}'
+        + (f' <span class="lowsamp">· {_t("eg_low_sample", n=meta["n"])}</span>'
+           if meta.get("low_sample") else "")
+        + '</div>'
         '<div class="ew-edge-stats">'
         f'<div><span class="k">{_t("eg_pf")}</span>'
         f'<span class="v">{pf:.2f}</span></div>'
